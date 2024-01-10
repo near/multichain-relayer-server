@@ -11,7 +11,6 @@ use near_lake_framework::LakeConfig;
 use configs::{init_logging, Opts};
 mod configs;
 
-// TODO refactor to use config.toml instead of config.rs
 // TODO change to testnet relayer contract
 // TODO listen for logs in format:
 /*
@@ -21,6 +20,8 @@ mod configs;
             payload: rlp_signed_hex,
             request_tokens_for_gas,
  */
+// TODO in next branch use alloy-rs to interact with the xchain
+// TODO after that, update txn status in redis
 
 
 /// Assuming we want to watch for transactions where a receiver account id is one of the provided in a list

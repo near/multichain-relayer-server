@@ -1,10 +1,20 @@
 # multichain-relayer-server
 Pagoda Implementation of Multichain Relayer Server facilitating cross chain transactions 
 
+## Run
+```shell
+cargo build --release
+./target/release/multichain-relayer-server --accounts nomnomnom.testnet --block-height 153978819 testnet
+```
+Replace: 
+1. `nomnomnom.testnet` with the relayer contract account id
+2. `153978819` with the current blockheight
+3. `testnet` with either testnet or mainnet
+
 ## Components
 This server interacts with 3 other components:
 1. Indexer 
-   - The implementation will either use [near-indexer](https://github.com/near/nearcore/tree/master/chain/indexer) based on [this example](https://github.com/near-examples/indexer-tx-watcher-example/tree/main) or [near-lake](https://github.com/near/near-lake-framework-rs) based on [this example](https://github.com/near-examples/near-lake-accounts-watcher/tree/main)
+   - The implementation uses [near-lake](https://github.com/near/near-lake-framework-rs) based on [this example](https://github.com/near-examples/indexer-tx-watcher-example-lake/tree/main)
 2. Redis Instance
     - Contains the state of the transaction (SIGNING, SENDING, FINAL_STATUS), which the relayer server updates.
 3. RPCs
