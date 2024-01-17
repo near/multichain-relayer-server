@@ -62,7 +62,7 @@ pub async fn listen_blocks(
                         target: "indexer_example",
                         "Transaction hash {:?} related to {} executed with status {:?}",
                         tx_receipt_ids.get(receipt_id.as_str()),
-                        &execution_outcome.receipt.receiver_id,
+                        &execution_outcome.receipt.predecessor_id,
                         execution_outcome.execution_outcome.outcome.status
                     );
                     if let near_indexer_primitives::views::ReceiptEnumView::Action {
@@ -85,5 +85,5 @@ fn is_tx_sender_watched(
     tx: &near_indexer_primitives::IndexerTransactionWithOutcome,
     watching_list: &[near_indexer_primitives::types::AccountId],
 ) -> bool {
-    watching_list.contains(&tx.transaction.sender_id)
+    watching_list.contains(&tx.transaction.signer_id)
 }
