@@ -19,5 +19,7 @@ tracing = "0.1.13"
 tracing-subscriber = "0.3.17"
 near-lake-framework = "0.7.3"
 
-# alloy dependencies
-# alloy = { git = "https://github.com/alloy-rs/alloy.git", branch = "main" }
+# alloy dependencies for EVM txn signing and sending
+alloy-consensus = { git = "https://github.com/alloy-rs/alloy.git" }
+alloy-eips = { git = "https://github.com/alloy-rs/alloy.git" }
+alloy-json-rpc = { git = "https://github.com/alloy-rs/alloy.git" }
