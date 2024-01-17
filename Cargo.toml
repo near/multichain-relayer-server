@@ -23,3 +23,6 @@ near-lake-framework = "0.7.3"
 alloy-consensus = { git = "https://github.com/alloy-rs/alloy.git" }
 alloy-eips = { git = "https://github.com/alloy-rs/alloy.git" }
 alloy-json-rpc = { git = "https://github.com/alloy-rs/alloy.git" }
+alloy-network = { git = "https://github.com/alloy-rs/alloy.git" }
+alloy-primitives = "0.3.3"
+alloy-signer = { git = "https://github.com/alloy-rs/alloy.git" }

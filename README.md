@@ -24,7 +24,7 @@ This server interacts with 3 other components:
 ## Functionality
 1. logs from the relayer onchain contract are emitted which gets picked up by the indexer. This triggers 2 events:
    1. Updates the state of the Transaction State Redis DB to SENDING with associated metadata 
-   2. Gets the XChain Signed Transaction in hexadecimal binary format and associated metadata (chainId, gas, xchain accountId).
+   2. Gets the XChain Signed Transaction in hexadecimal binary format and associated metadata (chain_id, gas, xchain accountId).
 2. Funding the user's xchain account with gas from the paymaster treasury account
 3. Sending the raw signed transaction (in hexadecimal in EVM case)
 4. Updating the state of the Transaction State Redis DB to FINAL_STATUS with associated metadata

@@ -1,5 +1,8 @@
-use tokio::sync::mpsc;
+// std dependencies
 use std::collections::{HashMap, HashSet};
+
+// external dependencies
+use tokio::sync::mpsc;
 use tracing::info;
 
 // near lake dependencies
@@ -29,8 +32,8 @@ pub async fn listen_blocks(
             };
 
             for transaction in chunk.transactions {
-                // Check if transaction receiver id is one of the list we are interested in
-                if is_tx_receiver_watched(&transaction, &watching_list) {
+                // Check if transaction sender id is one of the list we are interested in
+                if is_tx_sender_watched(&transaction, &watching_list) {
                     // extract receipt_id transaction was converted into
                     let converted_into_receipt_id = transaction
                         .outcome
@@ -78,9 +81,9 @@ pub async fn listen_blocks(
     }
 }
 
-fn is_tx_receiver_watched(
+fn is_tx_sender_watched(
     tx: &near_indexer_primitives::IndexerTransactionWithOutcome,
     watching_list: &[near_indexer_primitives::types::AccountId],
 ) -> bool {
-    watching_list.contains(&tx.transaction.receiver_id)
+    watching_list.contains(&tx.transaction.sender_id)
 }

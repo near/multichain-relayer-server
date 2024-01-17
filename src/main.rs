@@ -12,8 +12,9 @@ use near_lake_framework::near_indexer_primitives;
 use near_lake_framework::LakeConfig;
 
 // local dependencies
-use configs::{init_logging, Opts};
 mod configs;
+use configs::{init_logging, Opts};
+mod evm_relay;
 mod indexer;
 
 // TODO change to testnet relayer contract
