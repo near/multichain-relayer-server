@@ -18,7 +18,7 @@ This server interacts with 3 other components:
 2. Redis Instance
     - Contains the state of the transaction (SIGNING, SENDING, FINAL_STATUS), which the relayer server updates.
 3. RPCs
-    - EVM RPCs will be interacted with using the [alloy](https://github.com/alloy-rs/) crate. Initially we will connect to public RPCs
+    - EVM RPCs will be interacted with using the [alloy](https://github.com/alloy-rs/) crates. Initially we will connect to public RPCs
     - TODO Solana crate and RPC providers.
 
 ## Functionality
