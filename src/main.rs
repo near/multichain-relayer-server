@@ -18,16 +18,7 @@ mod evm_relay;
 mod indexer;
 
 // TODO change to testnet relayer contract
-// TODO listen for logs in format:
-/*
-            xchain_id: self.xchain_id.clone(),
-            sender: transaction.from().map(|a| to_checksum(a, None)),
-            payload_id: Some(hex::encode(txid.0)),
-            payload: rlp_signed_hex,
-            request_tokens_for_gas,
- */
-// TODO in next branch use alloy-rs to interact with the xchain
-// TODO after that, update txn status in redis
+// TODO update txn status in redis
 
 
 /// Assuming we want to watch for transactions where a receiver account id is one of the provided in a list

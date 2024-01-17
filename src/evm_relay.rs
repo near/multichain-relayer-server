@@ -3,13 +3,25 @@ use alloy_json_rpc::{Request, Client, Method};
 use alloy_primitives::{address, Address, Signature};
 use alloy_signer::{LocalWallet, Signer, SignerSync};
 
+// TODO replace with actual value
+const YOUR_TREASURY_ACCOUNT_NONCE: u64 = 0;
+// TODO replace with actual value
+const PRIORITY_FEE: u64 = 0;
+// TODO replace with actual value
+const MAX_FEE: u64 = 0;
+// TODO replace with actual value
+const GAS_LIMIT: u64 = 0;
+// TODO refactor to config file and mapping between chain_id, testnet/mainnet and rpc url
+const BSC_JSON_RPC_URL: &str = "https://data-seed-prebsc-1-s1.binance.org:8545";
+
+
 fn create_eip1559_transaction(account_id: Address, amount: &str, chain_id: u64) -> TxEip1559 {
     TxEip1559 {
         chain_id: Some(chain_id), // Replace with BSC chain ID
-        nonce: YOUR_TREASURY_ACCOUNT_NONCE,     // TODO replace with actual value
-        max_priority_fee_per_gas: PRIORITY_FEE,  // TODO replace with actual value
-        max_fee_per_gas: MAX_FEE,  // TODO replace with actual value
-        gas_limit: GAS_LIMIT,  // TODO replace with actual value
+        nonce: YOUR_TREASURY_ACCOUNT_NONCE,
+        max_priority_fee_per_gas: PRIORITY_FEE,
+        max_fee_per_gas: MAX_FEE,
+        gas_limit: GAS_LIMIT,
         action: TransactionAction::Call(account_id), // User account address
         value: amount, // Amount of Native Gas to transfer
         data: TransactionPayload::None,
@@ -18,7 +30,7 @@ fn create_eip1559_transaction(account_id: Address, amount: &str, chain_id: u64) 
 }
 
 async fn create_evm_signature(chain_id: u64) -> Signature {
-    // TODO replace with actual signature
+    // TODO replace with actual signature from alloy-signer
     // https://github.com/alloy-rs/alloy/tree/main/crates/signer
     Signature::default()
 }

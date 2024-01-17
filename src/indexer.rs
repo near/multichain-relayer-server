@@ -8,6 +8,27 @@ use tracing::info;
 // near lake dependencies
 use near_lake_framework::near_indexer_primitives;
 
+// TODO update to pick up events emitted from relayer contract instead of transactions
+// event indexing example https://github.com/frolvanya/near-lake-nft-indexer/blob/main/main.py
+// NEP-297 events: https://github.com/near/NEPs/blob/master/neps/nep-0297.md
+/*
+EVENT_JSON:{
+    "standard": "nepXXX",
+    "version": "1.0.0",
+    "event": "xyz_is_triggered",
+    "data": {
+        "triggered_by": "foundation.near"
+    }
+}
+
+data should contain:
+            xchain_id: self.xchain_id.clone(),
+            sender: transaction.from().map(|a| to_checksum(a, None)),
+            payload_id: Some(hex::encode(txid.0)),
+            payload: rlp_signed_hex,
+            request_tokens_for_gas,
+ */
+
 
 /// The main listener function the will be reading the stream of blocks `StreamerMessage`
 /// and perform necessary checks
