@@ -9,6 +9,7 @@ This server interacts with RPCs on other chains sending both presigned funding t
 ## Functionality
 1. Funding the user's xchain account with gas from the paymaster treasury account, which is provided as a raw signed transaction
 2. Sending the user's raw signed transaction (in hexadecimal in EVM case)
+3. (MVP only) `/get_balance_for_account` endpoint that gets the native gas token (BNB) balance for an account. AKA Poor man's indexing
 
 
 ## Technical Design
