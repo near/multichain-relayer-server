@@ -20,6 +20,7 @@ const BSC_RPC_URL: &str = "https://data-seed-prebsc-1-s1.binance.org:8545";
 const FLAMETRACE_PERFORMANCE: &bool = &true;
 
 // TODO utoipa and OpenApi docs
+// TODO error handling
 
 
 #[derive(Clone, Debug, Deserialize)]
