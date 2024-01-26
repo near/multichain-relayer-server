@@ -4,9 +4,71 @@ use axum::{
     routing::{post},
     Router
 };
-// TODO import and use ethers functions properly
+// TODO use custom middleware https://github.com/gakonst/ethers-rs/blob/88095ba47eb6a3507f0db1767353b387b27a6e98/ethers-providers/src/middleware.rs#L18
+// example below:
+/* from https://docs.rs/ethers/latest/ethers/middleware/trait.Middleware.html#required-associated-types
+use ethers_providers::{Middleware, MiddlewareError};
+use ethers_core::types::{U64, TransactionRequest, U256, transaction::eip2718::TypedTransaction, BlockId};
+use thiserror::Error;
+use async_trait::async_trait;
+
+#[derive(Debug)]
+struct MyMiddleware<M>(M);
+
+#[derive(Error, Debug)]
+pub enum MyError<M: Middleware> {
+    #[error("{0}")]
+    MiddlewareError(M::Error),
+
+    // Add your middleware's specific errors here
+}
+
+impl<M: Middleware> MiddlewareError for MyError<M> {
+    type Inner = M::Error;
+
+    fn from_err(src: M::Error) -> MyError<M> {
+        MyError::MiddlewareError(src)
+    }
+
+    fn as_inner(&self) -> Option<&Self::Inner> {
+        match self {
+            MyError::MiddlewareError(e) => Some(e),
+            _ => None,
+        }
+    }
+}
+
+#[async_trait]
+impl<M> Middleware for MyMiddleware<M>
+where
+    M: Middleware,
+{
+    type Error = MyError<M>;
+    type Provider = M::Provider;
+    type Inner = M;
+
+    fn inner(&self) -> &M {
+        &self.0
+    }
+
+    /// Overrides the default `get_block_number` method to always return 0
+    async fn get_block_number(&self) -> Result<U64, Self::Error> {
+        Ok(U64::zero())
+    }
+
+    /// Overrides the default `estimate_gas` method to log that it was called,
+    /// before forwarding the call to the next layer.
+    async fn estimate_gas(&self, tx: &TypedTransaction, block: Option<BlockId>) -> Result<U256, Self::Error> {
+        println!("Estimating gas...");
+        self.inner().estimate_gas(tx, block).await.map_err(MiddlewareError::from_err)
+    }
+}
+ */
+
+
 use ethers::{
-    providers::{Http, JsonRpcClient, JsonRpcClientWrapper},
+    core::types::Bytes as EthBytes,
+    providers::{Http, Provider::send_raw_transaction, JsonRpcClient, JsonRpcClientWrapper},
 };
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -98,27 +160,33 @@ async fn handle_send_funding_and_user_signed_txns(Json(payload): Json<Transactio
     let url = Url::parse(BSC_RPC_URL).unwrap();
     let provider = Http::new(url);
 
-    let funding_txn_raw = vec![json!(payload.raw_transactions[0])];
-    let user_txn_raw = vec![json!(payload.raw_transactions[1])];
+    let funding_txn_raw: EthBytes = EthBytes::from(payload.raw_transactions[0].into_bytes());
+    let user_txn_raw: EthBytes = EthBytes::from(payload.raw_transactions[1].into_bytes());
 
     // Send the first transaction (funding)
     info!("Sending Funding Transaction: {funding_txn_raw:#?}");
-    let tx1_response = JsonRpcClient::request(
-        &provider,
-        "eth_sendRawTransaction",
+    let tx1_response = provider.send_raw_transaction(
         funding_txn_raw,
     ).await?;
+    // let tx1_response = JsonRpcClient::request(
+    //     &provider,
+    //     "eth_sendRawTransaction",
+    //     funding_txn_raw,
+    // ).await?;
     info!("Funding Transaction Response: {tx1_response:#?}");
 
     // TODO: Wait for the transaction to be finalized and error handling
 
     // Send the second transaction
     info!("Sending User Foreign Chain Transaction: {user_txn_raw:#?}");
-    let tx2_response = JsonRpcClient::request(
-        &provider,
-        "eth_sendRawTransaction",
+    let tx2_response = provider.send_raw_transaction(
         user_txn_raw,
     ).await?;
+    // let tx2_response = JsonRpcClient::request(
+    //     &provider,
+    //     "eth_sendRawTransaction",
+    //     user_txn_raw,
+    // ).await?;
     info!("User Foreign Chain Transaction Response: {tx2_response:#?}");
 
     tx2_response.into_response()
