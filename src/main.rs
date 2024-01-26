@@ -1,19 +1,17 @@
-// mod alloy_transport_implementation;
-
 use axum::{
     Json,
     response::IntoResponse,
     routing::{post},
     Router
 };
-// TODO import and use alloy-json-rpc functions properly
-use alloy_rpc_client::RpcClient as AlloyRpcClient;
-use alloy_transport::Transport;
-use alloy_transport_http::Http as AlloyHttp;
-use reqwest::Client as ReqwestClient;
+// TODO import and use ethers functions properly
+use ethers::{
+    providers::{Http, JsonRpcClient, JsonRpcClientWrapper},
+};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::net::SocketAddr;
+use std::str::FromStr;
 use tower_http::trace::TraceLayer;
 use tracing::{debug, error, info, instrument};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
@@ -94,45 +92,36 @@ fn setup_global_subscriber() -> impl Drop {
 
 
 //#[instrument]
-async fn handle_send_funding_and_user_signed_txns(Json(payload): Json<TransactionRequest>) -> Result<Json<TransactionResponse>, impl IntoResponse> {
+async fn handle_send_funding_and_user_signed_txns(Json(payload): Json<TransactionRequest>) -> impl IntoResponse {
     info!("Received /handle_send_funding_and_user_signed_txns request: {payload:#?}");
     // TODO convert to global RPC client
-    let reqwest_client: ReqwestClient = ReqwestClient::new();
-    let url: Url = Url::parse(BSC_RPC_URL)?;
-    let transport_http: AlloyHttp<ReqwestClient> = AlloyHttp::new(
-        url,
-    );
-    // let reqwest_transport = ReqwestTransport::new(reqwest_client.clone());
-    let client: AlloyRpcClient<ReqwestClient> = AlloyRpcClient::new(
-        transport_http.client().clone(),
-        // reqwest_transport,
-        true,
-    );
+    let url = Url::parse(BSC_RPC_URL).unwrap();
+    let provider = Http::new(url);
+
+    let funding_txn_raw = vec![json!(payload.raw_transactions[0])];
+    let user_txn_raw = vec![json!(payload.raw_transactions[1])];
 
     // Send the first transaction (funding)
-    let tx1_request = client.prepare(
+    info!("Sending Funding Transaction: {funding_txn_raw:#?}");
+    let tx1_response = JsonRpcClient::request(
+        &provider,
         "eth_sendRawTransaction",
-        vec![json!(payload.raw_transactions[0])],
-    );
-    info!("Sending Funding Transaction: {tx1_request:#?}");
-    let tx1_response = tx1_request.await.unwrap();
+        funding_txn_raw,
+    ).await?;
     info!("Funding Transaction Response: {tx1_response:#?}");
 
     // TODO: Wait for the transaction to be finalized and error handling
 
     // Send the second transaction
-    let tx2_request = client.prepare(
+    info!("Sending User Foreign Chain Transaction: {user_txn_raw:#?}");
+    let tx2_response = JsonRpcClient::request(
+        &provider,
         "eth_sendRawTransaction",
-        vec![json!(payload.raw_transactions[1])],
-    );
-    info!("Sending User Foreign Chain Transaction: {tx2_request:#?}");
-    let tx2_response = tx2_request.await.unwrap();
+        user_txn_raw,
+    ).await?;
     info!("User Foreign Chain Transaction Response: {tx2_response:#?}");
 
-    Ok(Json(TransactionResponse {
-        status: "Success".into(),
-        transaction_hash: Some(tx2_response),
-    }))
+    tx2_response.into_response()
 }
 
 // #[instrument]
