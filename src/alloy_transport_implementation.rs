@@ -1,12 +1,12 @@
-// use alloy_transport::Transport;
-// use alloy_transport::r#trait::private::Sealed;
 // use alloy_json_rpc::error::RpcError;
 // use alloy_json_rpc::packet::{RequestPacket, ResponsePacket};
 // use reqwest::Client;
 // use std::future::Future;
 // use std::pin::Pin;
+// use std::task::{Context, Poll};
+// use tower::Service;
+// use crate::BSC_RPC_URL;
 //
-// // This is your custom wrapper around ReqwestClient
 // struct ReqwestTransport {
 //     client: Client,
 // }
@@ -15,39 +15,41 @@
 //     pub fn new(client: Client) -> Self {
 //         ReqwestTransport { client }
 //     }
-//
-//     // Implement other necessary methods here
 // }
 //
-// impl Sealed for ReqwestTransport {}
-//
-// impl Transport for ReqwestTransport {
-//     type Error = RpcError; // You need to define the error type properly
-//     type Future = Pin<Box<dyn Future<Output = Result<ResponsePacket, Self::Error>>>>;
+// impl Service<RequestPacket> for ReqwestTransport {
 //     type Response = ResponsePacket;
+//     type Error = RpcError;
+//     type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>> + Send>>;
 //
-//     fn call(&mut self, request: RequestPacket) -> Self::Future {
-//         // Convert RequestPacket to a format suitable for Reqwest
-//         // Make the actual HTTP call using ReqwestClient
-//         // Convert the response back to ResponsePacket
-//         // Handle errors appropriately
+//     fn poll_ready(&mut self, _cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+//         Poll::Ready(Ok(())) // Always ready to send a request
+//     }
 //
-//         // Example, you'll need to adapt this to your specific case
+//     fn call(&mut self, req: RequestPacket) -> Self::Future {
+//         let client = self.client.clone();
+//         let request_body = serde_json::to_string(&req).expect("Failed to serialize request");
+//
 //         Box::pin(async move {
-//             let response = self.client.post(/* URL and request details here */).send().await;
+//             let response = client.post(BSC_RPC_URL)
+//                 .body(request_body)
+//                 .send()
+//                 .await;
+//
 //             match response {
 //                 Ok(resp) => {
-//                     // Convert resp to ResponsePacket and return
+//                     let status = resp.status();
+//                     if status.is_success() {
+//                         let body = resp.text().await.expect("Failed to read response text");
+//                         let response_packet: ResponsePacket = serde_json::from_str(&body)
+//                             .expect("Failed to deserialize response");
+//                         Ok(response_packet)
+//                     } else {
+//                         Err(RpcError::TransportError(format!("HTTP error: {}", status)))
+//                     }
 //                 },
-//                 Err(e) => {
-//                     // Convert e to RpcError and return
-//                 }
+//                 Err(e) => Err(RpcError::TransportError(format!("Reqwest error: {}", e))),
 //             }
 //         })
 //     }
 // }
-//
-// // Usage
-// let reqwest_client = Client::new();
-// let transport = ReqwestTransport::new(reqwest_client);
-// let rpc_client = AlloyRpcClient::new(transport, true);

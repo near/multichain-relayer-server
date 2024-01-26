@@ -97,13 +97,15 @@ fn setup_global_subscriber() -> impl Drop {
 async fn handle_send_funding_and_user_signed_txns(Json(payload): Json<TransactionRequest>) -> Result<Json<TransactionResponse>, impl IntoResponse> {
     info!("Received /handle_send_funding_and_user_signed_txns request: {payload:#?}");
     // TODO convert to global RPC client
-    // let reqwest_client: ReqwestClient = ReqwestClient::new();
+    let reqwest_client: ReqwestClient = ReqwestClient::new();
     let url: Url = Url::parse(BSC_RPC_URL)?;
     let transport_http: AlloyHttp<ReqwestClient> = AlloyHttp::new(
         url,
     );
+    // let reqwest_transport = ReqwestTransport::new(reqwest_client.clone());
     let client: AlloyRpcClient<ReqwestClient> = AlloyRpcClient::new(
         transport_http.client().clone(),
+        // reqwest_transport,
         true,
     );
 
