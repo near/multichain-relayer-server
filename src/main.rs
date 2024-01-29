@@ -1,4 +1,5 @@
 mod etheres_middleware;
+mod util;
 
 use axum::{
     async_trait,
@@ -170,7 +171,7 @@ async fn get_balance_for_account(Json(payload): Json<BalanceRequestPayload>) -> 
     let evm_balance_request = EvmRpcBalanceRequest {
         jsonrpc: "2.0".to_string(),
         method: "eth_getBalance".to_string(),
-        params: vec![address, "latest".to_string()],
+        params: vec![address.clone(), "latest".to_string()],
         id: 1,  // TODO change id
     };
     info!("Balance Request: {evm_balance_request:#?}");
@@ -195,8 +196,9 @@ async fn get_balance_for_account(Json(payload): Json<BalanceRequestPayload>) -> 
         },
     };
 
-    // TODO convert from EVM garbly gook 0x214e8348c4f0000 to U256, then str
-    let balance: &str = &evm_balance_response.result;
+    // TODO this seems correct when comparing the response from postman via RPC, but not when looking at bscscan or etherscan
+    let balance: U256 = util::convert_to_u256(&*evm_balance_response.result).unwrap();
+    info!("balance: {balance:#?} for account: {address:#?}");
 
     (StatusCode::OK, balance.to_string()).into_response()
 }
