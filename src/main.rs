@@ -1,3 +1,5 @@
+mod etheres_middleware;
+
 use axum::{
     Json,
     response::IntoResponse,
@@ -5,65 +7,6 @@ use axum::{
     Router
 };
 // TODO use custom middleware https://github.com/gakonst/ethers-rs/blob/88095ba47eb6a3507f0db1767353b387b27a6e98/ethers-providers/src/middleware.rs#L18
-// example below:
-/* from https://docs.rs/ethers/latest/ethers/middleware/trait.Middleware.html#required-associated-types
-use ethers_providers::{Middleware, MiddlewareError};
-use ethers_core::types::{U64, TransactionRequest, U256, transaction::eip2718::TypedTransaction, BlockId};
-use thiserror::Error;
-use async_trait::async_trait;
-
-#[derive(Debug)]
-struct MyMiddleware<M>(M);
-
-#[derive(Error, Debug)]
-pub enum MyError<M: Middleware> {
-    #[error("{0}")]
-    MiddlewareError(M::Error),
-
-    // Add your middleware's specific errors here
-}
-
-impl<M: Middleware> MiddlewareError for MyError<M> {
-    type Inner = M::Error;
-
-    fn from_err(src: M::Error) -> MyError<M> {
-        MyError::MiddlewareError(src)
-    }
-
-    fn as_inner(&self) -> Option<&Self::Inner> {
-        match self {
-            MyError::MiddlewareError(e) => Some(e),
-            _ => None,
-        }
-    }
-}
-
-#[async_trait]
-impl<M> Middleware for MyMiddleware<M>
-where
-    M: Middleware,
-{
-    type Error = MyError<M>;
-    type Provider = M::Provider;
-    type Inner = M;
-
-    fn inner(&self) -> &M {
-        &self.0
-    }
-
-    /// Overrides the default `get_block_number` method to always return 0
-    async fn get_block_number(&self) -> Result<U64, Self::Error> {
-        Ok(U64::zero())
-    }
-
-    /// Overrides the default `estimate_gas` method to log that it was called,
-    /// before forwarding the call to the next layer.
-    async fn estimate_gas(&self, tx: &TypedTransaction, block: Option<BlockId>) -> Result<U256, Self::Error> {
-        println!("Estimating gas...");
-        self.inner().estimate_gas(tx, block).await.map_err(MiddlewareError::from_err)
-    }
-}
- */
 
 
 use ethers::{

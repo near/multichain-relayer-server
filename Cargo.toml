@@ -7,7 +7,11 @@ edition = "2021"
 
 [dependencies]
 # ethers dependencies for EVM txn sending and RPC calls
+async-trait = "0.1.73"
 ethers = "2.0.10"
+ethers-core = "2.0.10"
+ethers-providers = "2.0.10"
+thiserror = "1.0.48"
 
 # server dependencies
 axum = "0.6.20"
