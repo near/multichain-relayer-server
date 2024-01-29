@@ -6,7 +6,13 @@ use thiserror::Error;
 use async_trait::async_trait;
 
 #[derive(Debug)]
-struct MyMiddleware<M>(M);
+pub(crate) struct MyMiddleware<M>(M);
+
+impl<M> MyMiddleware<M> {
+    pub fn new(inner: M) -> Self {
+        MyMiddleware(inner)
+    }
+}
 
 #[derive(Error, Debug)]
 pub enum MyError<M: Middleware> {
@@ -44,11 +50,13 @@ impl<M> Middleware for MyMiddleware<M>
         &self.0
     }
 
-    async fn get_balance(&self, address: H160, block: Option<BlockId>) -> Result<U256, Self::Error> {
-        println!("Getting balance for address {address}");
-        self.inner().get_balance(address, None).await.map_err(MiddlewareError::from_err)
-    }
+    /// Overrides get_balance method and always sets the block to None (latest)
+    // async fn get_balance(&self, address: H160, block: Option<BlockId>) -> Result<U256, Self::Error> {
+    //     println!("Getting balance for address {address}");
+    //     self.inner().get_balance(address, None).await.map_err(MiddlewareError::from_err)
+    // }
 
+    /// Overrides send_raw_transaction method
     async fn send_raw_transaction(&self, tx: Bytes) -> Result<PendingTransaction<'_, M::Provider>, Self::Error> {
         println!("Sending raw transaction {tx:?}");
         self.inner().send_raw_transaction(tx).await.map_err(MiddlewareError::from_err)

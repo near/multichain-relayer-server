@@ -11,7 +11,7 @@ use axum::{
 
 use ethers::{
     core::types::Bytes as EthBytes,
-    providers::{Http, Provider::send_raw_transaction, JsonRpcClient, JsonRpcClientWrapper},
+    providers::{Http, Provider, JsonRpcClient, JsonRpcClientWrapper},
 };
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -101,38 +101,52 @@ async fn handle_send_funding_and_user_signed_txns(Json(payload): Json<Transactio
     info!("Received /handle_send_funding_and_user_signed_txns request: {payload:#?}");
     // TODO convert to global RPC client
     let url = Url::parse(BSC_RPC_URL).unwrap();
-    let provider = Http::new(url);
+    let provider: Http = Http::new(url);
+    let middleware = etheres_middleware::MyMiddleware::new(provider);
 
     let funding_txn_raw: EthBytes = EthBytes::from(payload.raw_transactions[0].into_bytes());
     let user_txn_raw: EthBytes = EthBytes::from(payload.raw_transactions[1].into_bytes());
 
     // Send the first transaction (funding)
     info!("Sending Funding Transaction: {funding_txn_raw:#?}");
-    let tx1_response = provider.send_raw_transaction(
-        funding_txn_raw,
-    ).await?;
+    return match middleware.send_raw_transaction(funding_txn_raw).await {
+        Ok(tx_hash) => {
+            info!("Funding Transaction sent successfully. Hash: {:?}", tx_hash);
+            // TODO: Wait for the transaction to be finalized
+
+            // Send the second transaction
+            info!("Sending User Foreign Chain Transaction: {user_txn_raw:#?}");
+            match middleware.send_raw_transaction(user_txn_raw).await {
+                Ok(tx_hash) => {
+                    info!("Transaction sent successfully. Hash: {:?}", tx_hash);
+                    "OK".into_response()
+                },
+                Err(e) => {
+                    eprintln!("Error sending transaction: {:?}", e);
+                    e.into_response()
+                },
+            }
+        },
+        Err(e) => {
+            error!("Error sending transaction: {:?}", e);
+            e.into_response()
+        },
+    }
     // let tx1_response = JsonRpcClient::request(
     //     &provider,
     //     "eth_sendRawTransaction",
     //     funding_txn_raw,
     // ).await?;
-    info!("Funding Transaction Response: {tx1_response:#?}");
+    // info!("Funding Transaction Response: {tx1_response:#?}");
 
-    // TODO: Wait for the transaction to be finalized and error handling
-
-    // Send the second transaction
-    info!("Sending User Foreign Chain Transaction: {user_txn_raw:#?}");
-    let tx2_response = provider.send_raw_transaction(
-        user_txn_raw,
-    ).await?;
     // let tx2_response = JsonRpcClient::request(
     //     &provider,
     //     "eth_sendRawTransaction",
     //     user_txn_raw,
     // ).await?;
-    info!("User Foreign Chain Transaction Response: {tx2_response:#?}");
+    //info!("User Foreign Chain Transaction Response: {tx2_response:#?}");
 
-    tx2_response.into_response()
+
 }
 
 // #[instrument]
