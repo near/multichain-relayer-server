@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 
 
@@ -6,13 +7,11 @@ pub struct Config {
     // TODO get rid of this post ETHDenver
     pub(crate) bsc_testnet_rpc_url: String,
     pub(crate) flametrace_performance: bool,
-    pub(crate) chains: Vec<ChainConfig>,
+    pub(crate) chains: HashMap<String, ChainConfig>,
 }
 
 #[derive(Deserialize)]
 pub struct ChainConfig {
-    pub(crate) chain_id: String,
-    pub(crate) hex_name: String,
     pub(crate) name: String,
     pub(crate) rpc_url: String,
 }
