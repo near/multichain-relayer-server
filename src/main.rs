@@ -62,11 +62,18 @@ struct EvmRpcRequest {
     id: u32,
 }
 
+#[derive(Clone, Deserialize, Serialize, Debug)]
+struct RpcError {
+    code: i32,
+    message: String,
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 struct EvmResponse {
     jsonrpc: String,
     id: u32,
-    result: String,
+    result: Option<String>,
+    error: Option<RpcError>,
 }
 
 
@@ -129,18 +136,18 @@ async fn send_funding_and_user_signed_txns(Json(payload): Json<TransactionReques
     info!("Sending Funding Transaction: {evm_funding_request:#?}");
 
     let client = reqwest::Client::new();
-    let response = match client.post(BSC_RPC_URL)
+    let evm_funding_http_response = match client.post(BSC_RPC_URL)
         .json(&evm_funding_request)
         .send()
         .await {
         Ok(res) => res,
         Err(_) => {
-            error!("Failed to parse response");
-            return (StatusCode::INTERNAL_SERVER_ERROR, "Failed to send request").into_response();
+            error!("Failed to parse EVM funding response");
+            return (StatusCode::INTERNAL_SERVER_ERROR, "Failed to send EVM funding request").into_response();
         },
     };
 
-    let evm_funding_response: EvmResponse = match response.json().await {
+    let evm_funding_response: EvmResponse = match evm_funding_http_response.json().await {
         Ok(res) => res,
         Err(_) => {
             error!("Failed to parse funding response");
@@ -178,8 +185,15 @@ async fn send_funding_and_user_signed_txns(Json(payload): Json<TransactionReques
         },
     };
     info!("User Foreign Chain Txn Response: {evm_user_txn_response:#?}");
+    return if evm_user_txn_response.result.is_some() {
+        let result: String = evm_user_txn_response.result.unwrap();
+        (StatusCode::OK, result).into_response()
+    } else {
+        let result: RpcError = evm_user_txn_response.error.unwrap();
+        let result_str = json!(result).to_string();
+        (StatusCode::BAD_REQUEST, result_str).into_response()
+    }
 
-    (StatusCode::OK, evm_user_txn_response.result).into_response()
 }
 
 #[instrument]
@@ -194,27 +208,28 @@ async fn get_balance_for_account(Json(payload): Json<BalanceRequestPayload>) -> 
     info!("Balance Request: {evm_balance_request:#?}");
 
     let client = reqwest::Client::new();
-    let response = match client.post(BSC_RPC_URL)
+    let evm_balance_http_response = match client.post(BSC_RPC_URL)
         .json(&evm_balance_request)
         .send()
         .await {
         Ok(res) => res,
         Err(_) => {
-            error!("Failed to parse response");
-            return (StatusCode::INTERNAL_SERVER_ERROR, "Failed to send request").into_response();
+            error!("Failed to parse EVM balance response");
+            return (StatusCode::INTERNAL_SERVER_ERROR, "Failed to send EVM balance request").into_response();
         },
     };
 
-    let evm_balance_response: EvmResponse = match response.json().await {
+    let evm_balance_response: EvmResponse = match evm_balance_http_response.json().await {
         Ok(res) => res,
         Err(_) => {
             error!("Failed to parse response");
             return (StatusCode::BAD_REQUEST, "Failed to parse response").into_response();
         },
     };
-
+    // default to 0 balance if not found
+    let hex_str: String = evm_balance_response.result.unwrap_or("0x0".to_string());
     // TODO this seems correct when comparing the response from postman via RPC, but not when looking at bscscan or etherscan
-    let balance: U256 = util::convert_hex_to_u256(&*evm_balance_response.result).unwrap();
+    let balance: U256 = util::convert_hex_to_u256(&hex_str).unwrap();
     info!("balance: {balance:#?} for account: {address:#?}");
 
     (StatusCode::OK, balance.to_string()).into_response()
