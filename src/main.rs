@@ -1,34 +1,24 @@
-mod etheres_middleware;
 mod util;
 
 use axum::{
-    async_trait,
-    body::HttpBody,
-    extract::FromRequest,
     http::StatusCode,
     Json,
     response::IntoResponse,
     routing::{get, post},
     Router
 };
-// TODO use custom middleware https://github.com/gakonst/ethers-rs/blob/88095ba47eb6a3507f0db1767353b387b27a6e98/ethers-providers/src/middleware.rs#L18
-
-
 use ethers::{
     core::types::Bytes as EthBytes,
     core::types::U256,
-    providers::{Http, Provider, JsonRpcClient, JsonRpcClientWrapper},
 };
 use reqwest;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::net::SocketAddr;
-use std::str::FromStr;
 use tower_http::trace::TraceLayer;
-use tracing::{debug, error, info, instrument};
+use tracing::{error, info, instrument};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use tracing_flame::FlameLayer;
-use url::Url;
 
 // TODO refactor along with 3030 Port into config.toml and load from there
 // Constants

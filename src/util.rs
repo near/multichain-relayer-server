@@ -1,5 +1,4 @@
 use ethers::core::types::U256;
-use std::str::FromStr;
 
 pub(crate) fn convert_hex_to_u256(hex_str: &str) -> Result<U256, &'static str> {
     // Remove the '0x' prefix if present
