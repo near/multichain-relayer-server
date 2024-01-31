@@ -38,16 +38,16 @@ const FLAMETRACE_PERFORMANCE: &bool = &true;
 // TODO utoipa and OpenApi docs
 
 
-// #[derive(Clone, Debug, Deserialize)]
-// struct TransactionRequest {
-//     raw_transactions: [String; 2],
-// }
-//
-// #[derive(Clone, Debug, Serialize)]
-// struct TransactionResponse {
-//     status: String,
-//     transaction_hash: Option<String>,
-// }
+#[derive(Clone, Debug, Deserialize)]
+struct TransactionRequest {
+    raw_transactions: [String; 2],
+}
+
+#[derive(Clone, Debug, Serialize)]
+struct TransactionResponse {
+    status: String,
+    transaction_hash: Option<String>,
+}
 
 #[derive(Clone, Debug, Deserialize)]
 struct BalanceRequestPayload {
@@ -55,7 +55,7 @@ struct BalanceRequestPayload {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-struct EvmRpcBalanceRequest {
+struct EvmRpcRequest {
     jsonrpc: String,
     method: String,
     params: Vec<String>,
@@ -63,7 +63,7 @@ struct EvmRpcBalanceRequest {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-struct EvmBalanceResponse {
+struct EvmResponse {
     jsonrpc: String,
     id: u32,
     result: String,
@@ -85,7 +85,7 @@ async fn main() {
     }
 
     let app = Router::new()
-        //.route("/send_funding_and_user_signed_txns", post(send_funding_and_user_signed_txns))
+        .route("/send_funding_and_user_signed_txns", post(send_funding_and_user_signed_txns))
         .route("/get_balance_for_account", get(get_balance_for_account))
         // See https://docs.rs/tower-http/0.1.1/tower_http/trace/index.html for more details.
         .layer(TraceLayer::new_for_http());
@@ -112,67 +112,84 @@ fn setup_global_subscriber() -> impl Drop {
 }
 
 
-//#[instrument]
-// async fn send_funding_and_user_signed_txns(Json(payload): Json<TransactionRequest>) -> impl IntoResponse {
-//     info!("Received /handle_send_funding_and_user_signed_txns request: {payload:#?}");
-//     // TODO convert to global RPC client
-//     let url = Url::parse(BSC_RPC_URL).unwrap();
-//     let provider: Http = Http::new(url);
-//     let middleware = etheres_middleware::MyMiddleware::new(provider);
-//
-//     let funding_txn_raw: EthBytes = EthBytes::from(payload.raw_transactions[0].into_bytes());
-//     let user_txn_raw: EthBytes = EthBytes::from(payload.raw_transactions[1].into_bytes());
-//
-//     // Send the first transaction (funding)
-//     info!("Sending Funding Transaction: {funding_txn_raw:#?}");
-//     return match middleware.send_raw_transaction(funding_txn_raw).await {
-//         Ok(tx_hash) => {
-//             info!("Funding Transaction sent successfully. Hash: {:?}", tx_hash);
-//             // TODO: Wait for the transaction to be finalized
-//
-//             // Send the second transaction
-//             info!("Sending User Foreign Chain Transaction: {user_txn_raw:#?}");
-//             match middleware.send_raw_transaction(user_txn_raw).await {
-//                 Ok(tx_hash) => {
-//                     info!("Transaction sent successfully. Hash: {:?}", tx_hash);
-//                     "OK".into_response()
-//                 },
-//                 Err(e) => {
-//                     eprintln!("Error sending transaction: {:?}", e);
-//                     e.into_response()
-//                 },
-//             }
-//         },
-//         Err(e) => {
-//             error!("Error sending transaction: {:?}", e);
-//             e.into_response()
-//         },
-//     }
-//     // let tx1_response = JsonRpcClient::request(
-//     //     &provider,
-//     //     "eth_sendRawTransaction",
-//     //     funding_txn_raw,
-//     // ).await?;
-//     // info!("Funding Transaction Response: {tx1_response:#?}");
-//
-//     // let tx2_response = JsonRpcClient::request(
-//     //     &provider,
-//     //     "eth_sendRawTransaction",
-//     //     user_txn_raw,
-//     // ).await?;
-//     //info!("User Foreign Chain Transaction Response: {tx2_response:#?}");
-//
-//
-// }
+#[instrument]
+async fn send_funding_and_user_signed_txns(Json(payload): Json<TransactionRequest>) -> impl IntoResponse {
+    info!("Received /send_funding_and_user_signed_txns request: {payload:#?}");
+
+    let funding_txn_raw: EthBytes = EthBytes::from(payload.raw_transactions[0].clone().into_bytes());
+    let user_txn_raw: EthBytes = EthBytes::from(payload.raw_transactions[1].clone().into_bytes());
+
+    // Send the first transaction (funding)
+    let evm_funding_request = EvmRpcRequest {
+        jsonrpc: "2.0".to_string(),
+        method: "eth_sendRawTransaction".to_string(),
+        params: vec![funding_txn_raw.to_string()],
+        id: 1,  // if needed change id
+    };
+    info!("Sending Funding Transaction: {evm_funding_request:#?}");
+
+    let client = reqwest::Client::new();
+    let response = match client.post(BSC_RPC_URL)
+        .json(&evm_funding_request)
+        .send()
+        .await {
+        Ok(res) => res,
+        Err(_) => {
+            error!("Failed to parse response");
+            return (StatusCode::INTERNAL_SERVER_ERROR, "Failed to send request").into_response();
+        },
+    };
+
+    let evm_funding_response: EvmResponse = match response.json().await {
+        Ok(res) => res,
+        Err(_) => {
+            error!("Failed to parse funding response");
+            return (StatusCode::BAD_REQUEST, "Failed to parse funding response").into_response();
+        },
+    };
+    info!("Funding Response: {evm_funding_response:#?}");
+
+    // Send the second transaction (actual user txn)
+    let evm_user_txn_request = EvmRpcRequest {
+        jsonrpc: "2.0".to_string(),
+        method: "eth_sendRawTransaction".to_string(),
+        params: vec![user_txn_raw.to_string()],
+        id: 1,  // if needed change id
+    };
+    info!("Sending User Transaction: {evm_user_txn_request:#?}");
+
+    let client = reqwest::Client::new();
+    let response = match client.post(BSC_RPC_URL)
+        .json(&evm_user_txn_request)
+        .send()
+        .await {
+        Ok(res) => res,
+        Err(_) => {
+            error!("Failed to parse user foreign chain txn response");
+            return (StatusCode::INTERNAL_SERVER_ERROR, "Failed to send user foreign chain txn request").into_response();
+        },
+    };
+
+    let evm_user_txn_response: EvmResponse = match response.json().await {
+        Ok(res) => res,
+        Err(_) => {
+            error!("Failed to parse user foreign chain txn response");
+            return (StatusCode::BAD_REQUEST, "Failed to parse user foreign chain txn response").into_response();
+        },
+    };
+    info!("User Foreign Chain Txn Response: {evm_user_txn_response:#?}");
+
+    (StatusCode::OK, evm_user_txn_response.result).into_response()
+}
 
 #[instrument]
 async fn get_balance_for_account(Json(payload): Json<BalanceRequestPayload>) -> impl IntoResponse {
     let address = payload.address;
-    let evm_balance_request = EvmRpcBalanceRequest {
+    let evm_balance_request = EvmRpcRequest {
         jsonrpc: "2.0".to_string(),
         method: "eth_getBalance".to_string(),
         params: vec![address.clone(), "latest".to_string()],
-        id: 1,  // TODO change id
+        id: 1,  // if needed change id
     };
     info!("Balance Request: {evm_balance_request:#?}");
 
@@ -188,7 +205,7 @@ async fn get_balance_for_account(Json(payload): Json<BalanceRequestPayload>) -> 
         },
     };
 
-    let evm_balance_response: EvmBalanceResponse = match response.json().await {
+    let evm_balance_response: EvmResponse = match response.json().await {
         Ok(res) => res,
         Err(_) => {
             error!("Failed to parse response");
@@ -197,7 +214,7 @@ async fn get_balance_for_account(Json(payload): Json<BalanceRequestPayload>) -> 
     };
 
     // TODO this seems correct when comparing the response from postman via RPC, but not when looking at bscscan or etherscan
-    let balance: U256 = util::convert_to_u256(&*evm_balance_response.result).unwrap();
+    let balance: U256 = util::convert_hex_to_u256(&*evm_balance_response.result).unwrap();
     info!("balance: {balance:#?} for account: {address:#?}");
 
     (StatusCode::OK, balance.to_string()).into_response()
