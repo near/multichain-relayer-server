@@ -1,83 +1,50 @@
 mod util;
+mod structs;
+
+#[macro_use]
+extern crate lazy_static;
 
 use axum::{
     http::StatusCode,
     Json,
     response::IntoResponse,
-    routing::{get, post},
-    Router
+    Router,
+    routing::{get, post}
 };
 use ethers::{
     core::types::Bytes as EthBytes,
     core::types::U256,
 };
 use reqwest;
-use serde::{Deserialize, Serialize};
 use serde_json::json;
+use std::fs;
 use std::net::SocketAddr;
+use toml;
 use tower_http::trace::TraceLayer;
 use tracing::{error, info, instrument};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+use structs::{BalanceRequestPayload, Config, EvmResponse, EvmRpcRequest, RpcError, TransactionRequest};
 use tracing_flame::FlameLayer;
 
-// TODO refactor along with to load from config.toml
+
 // Constants
-const BSC_TESTNET_RPC_URL: &str = "https://data-seed-prebsc-1-s1.binance.org:8545";  // TODO remove and replace with CHAIN_ID_TO_RPC_URL_MAP
-const FLAMETRACE_PERFORMANCE: &bool = &true;
-const NUM_CHAIN_SUPPORTED: usize = 2;
-const CHAIN_ID_HEX_NAME_RPC_URL: [(&str, &str, &str, &str); NUM_CHAIN_SUPPORTED] = [
-    ("97", "0x61", "BSC_TESTNET", "https://data-seed-prebsc-1-s1.binance.org:8545"),
-    ("56", "0x38", "BSC_TESTNET", "https://bsc-dataseed.binance.org"),
-];
+lazy_static! {
+    static ref CONFIG: Config = load_config();
+}
+
+fn load_config() -> Config {
+    let config_str = fs::read_to_string("config.toml")
+        .expect("Failed to read config.toml");
+    toml::from_str(&config_str).expect("Failed to parse config.toml")
+}
 // TODO support multiple chains in code
 // TODO utoipa and OpenApi docs
-
-
-#[derive(Clone, Debug, Deserialize)]
-struct TransactionRequest {
-    raw_transactions: [String; 2],
-    chain_id: Option<String>,
-}
-
-#[derive(Clone, Debug, Serialize)]
-struct TransactionResponse {
-    status: String,
-    transaction_hash: Option<String>,
-}
-
-#[derive(Clone, Debug, Deserialize)]
-struct BalanceRequestPayload {
-    address: String,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-struct EvmRpcRequest {
-    jsonrpc: String,
-    method: String,
-    params: Vec<String>,
-    id: u32,
-}
-
-#[derive(Clone, Deserialize, Serialize, Debug)]
-struct RpcError {
-    code: i32,
-    message: String,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-struct EvmResponse {
-    jsonrpc: String,
-    id: u32,
-    result: Option<String>,
-    error: Option<RpcError>,
-}
-
 
 
 #[tokio::main]
 async fn main() {
     // initialize tracing (aka logging)
-    if *FLAMETRACE_PERFORMANCE {
+    if CONFIG.flametrace_performance {
         setup_global_subscriber();
         info!("default tracing setup with flametrace performance ENABLED");
     } else {
@@ -132,7 +99,7 @@ async fn send_funding_and_user_signed_txns(Json(payload): Json<TransactionReques
     info!("Sending Funding Transaction: {evm_funding_request:#?}");
 
     let client = reqwest::Client::new();
-    let evm_funding_http_response = match client.post(BSC_TESTNET_RPC_URL)
+    let evm_funding_http_response = match client.post(CONFIG.bsc_testnet_rpc_url.clone())
         .json(&evm_funding_request)
         .send()
         .await {
@@ -162,7 +129,7 @@ async fn send_funding_and_user_signed_txns(Json(payload): Json<TransactionReques
     info!("Sending User Transaction: {evm_user_txn_request:#?}");
 
     let client = reqwest::Client::new();
-    let response = match client.post(BSC_TESTNET_RPC_URL)
+    let response = match client.post(CONFIG.bsc_testnet_rpc_url.clone())
         .json(&evm_user_txn_request)
         .send()
         .await {
@@ -204,7 +171,7 @@ async fn get_balance_for_account(Json(payload): Json<BalanceRequestPayload>) -> 
     info!("Balance Request: {evm_balance_request:#?}");
 
     let client = reqwest::Client::new();
-    let evm_balance_http_response = match client.post(BSC_TESTNET_RPC_URL)
+    let evm_balance_http_response = match client.post(CONFIG.bsc_testnet_rpc_url.clone())
         .json(&evm_balance_request)
         .send()
         .await {

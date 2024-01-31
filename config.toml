@@ -1,0 +1,6 @@
+bsc_testnet_rpc_url = "https://data-seed-prebsc-1-s1.binance.org:8545"
+flametrace_performance = true
+chains = [
+    { chain_id = "97", hex_name = "0x61", name = "BSC_TESTNET", rpc_url = "https://data-seed-prebsc-1-s1.binance.org:8545" },
+    { chain_id = "56", hex_name = "0x38", name = "BSC_TESTNET", rpc_url = "https://bsc-dataseed.binance.org" }
+]
