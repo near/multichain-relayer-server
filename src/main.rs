@@ -20,17 +20,23 @@ use tracing::{error, info, instrument};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use tracing_flame::FlameLayer;
 
-// TODO refactor along with 3030 Port into config.toml and load from there
+// TODO refactor along with to load from config.toml
 // Constants
-const BSC_RPC_URL: &str = "https://data-seed-prebsc-1-s1.binance.org:8545";
+const BSC_TESTNET_RPC_URL: &str = "https://data-seed-prebsc-1-s1.binance.org:8545";  // TODO remove and replace with CHAIN_ID_TO_RPC_URL_MAP
 const FLAMETRACE_PERFORMANCE: &bool = &true;
-
+const NUM_CHAIN_SUPPORTED: usize = 2;
+const CHAIN_ID_HEX_NAME_RPC_URL: [(&str, &str, &str, &str); NUM_CHAIN_SUPPORTED] = [
+    ("97", "0x61", "BSC_TESTNET", "https://data-seed-prebsc-1-s1.binance.org:8545"),
+    ("56", "0x38", "BSC_TESTNET", "https://bsc-dataseed.binance.org"),
+];
+// TODO support multiple chains in code
 // TODO utoipa and OpenApi docs
 
 
 #[derive(Clone, Debug, Deserialize)]
 struct TransactionRequest {
     raw_transactions: [String; 2],
+    chain_id: Option<String>,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -126,7 +132,7 @@ async fn send_funding_and_user_signed_txns(Json(payload): Json<TransactionReques
     info!("Sending Funding Transaction: {evm_funding_request:#?}");
 
     let client = reqwest::Client::new();
-    let evm_funding_http_response = match client.post(BSC_RPC_URL)
+    let evm_funding_http_response = match client.post(BSC_TESTNET_RPC_URL)
         .json(&evm_funding_request)
         .send()
         .await {
@@ -156,7 +162,7 @@ async fn send_funding_and_user_signed_txns(Json(payload): Json<TransactionReques
     info!("Sending User Transaction: {evm_user_txn_request:#?}");
 
     let client = reqwest::Client::new();
-    let response = match client.post(BSC_RPC_URL)
+    let response = match client.post(BSC_TESTNET_RPC_URL)
         .json(&evm_user_txn_request)
         .send()
         .await {
@@ -198,7 +204,7 @@ async fn get_balance_for_account(Json(payload): Json<BalanceRequestPayload>) -> 
     info!("Balance Request: {evm_balance_request:#?}");
 
     let client = reqwest::Client::new();
-    let evm_balance_http_response = match client.post(BSC_RPC_URL)
+    let evm_balance_http_response = match client.post(BSC_TESTNET_RPC_URL)
         .json(&evm_balance_request)
         .send()
         .await {
@@ -218,7 +224,6 @@ async fn get_balance_for_account(Json(payload): Json<BalanceRequestPayload>) -> 
     };
     // default to 0 balance if not found
     let hex_str: String = evm_balance_response.result.unwrap_or("0x0".to_string());
-    // TODO this seems correct when comparing the response from postman via RPC, but not when looking at bscscan or etherscan
     let balance: U256 = util::convert_hex_to_u256(&hex_str).unwrap();
     info!("balance: {balance:#?} for account: {address:#?}");
 
