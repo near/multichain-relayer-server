@@ -118,6 +118,11 @@ async fn send_funding_and_user_signed_txns(Json(payload): Json<TransactionReques
         },
     };
     info!("Funding Response: {evm_funding_response:#?}");
+    if evm_funding_response.error.is_some() {
+        let result: RpcError = evm_funding_response.error.unwrap();
+        let result_str = json!(result).to_string();
+        return (StatusCode::BAD_REQUEST, result_str).into_response()
+    }
 
     // Send the second transaction (actual user txn)
     let evm_user_txn_request = EvmRpcRequest {
