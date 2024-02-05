@@ -18,7 +18,12 @@ def get_account_balance(address: str):
 def send_transaction_to_near_rpc(transaction_rlp_hex: str, use_paymaster: bool, chain_id: str):
     near_rpc_url = "https://rpc.testnet.near.org"
     payload = {
-        # TODO Update payload structure according to the actual NEAR RPC documentation
+        "jsonrpc": "2.0",
+        "id": "1",
+        "method": "broadcast_tx_commit",
+        "params": [
+            transaction_rlp_hex
+        ]
     }
     response = requests.post(near_rpc_url, json=payload)
     if response.status_code == 200:
@@ -42,7 +47,8 @@ def send_raw_transactions(raw_transactions: List[str], chain_id: str):
 initial_balance = get_account_balance("0x48cf9dA81d8c9FE834093eCE58ea7221aBc19DB2")
 
 # Step 2: Prepare and encode RLP transaction
-# TODO
+# TODO Update payload structure to be borsh serialized transaction with RLP encoding unsigned EVM txn
+# TODO LP also add the chain_id in the payload
 transaction_rlp_hex = "TODO_rlp_encoded_transaction_here"
 
 # Step 3: Use NEAR RPC to submit the transaction
