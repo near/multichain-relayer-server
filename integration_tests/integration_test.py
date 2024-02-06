@@ -15,14 +15,14 @@ def get_account_balance(address: str):
         raise Exception("Failed to fetch account balance.")
 
 
-def send_transaction_to_near_rpc(transaction_rlp_hex: str, use_paymaster: bool, chain_id: str):
+def send_transaction_to_near_rpc(b64_txn: str, use_paymaster: bool, chain_id: str):
     near_rpc_url = "https://rpc.testnet.near.org"
     payload = {
         "jsonrpc": "2.0",
         "id": "1",
         "method": "broadcast_tx_commit",
         "params": [
-            transaction_rlp_hex
+            b64_txn
         ]
     }
     response = requests.post(near_rpc_url, json=payload)
@@ -49,11 +49,12 @@ initial_balance = get_account_balance("0x48cf9dA81d8c9FE834093eCE58ea7221aBc19DB
 # Step 2: Prepare and encode RLP transaction
 # TODO Update payload structure to be borsh serialized transaction with RLP encoding unsigned EVM txn
 # TODO LP also add the chain_id in the payload
-transaction_rlp_hex = "TODO_rlp_encoded_transaction_here"
+# paste this in from output of running `near` rust cli to construct the transaction
+b64_near_transaction_with_rlp_hex = "TODO_rlp_encoded_transaction_here"
 
 # Step 3: Use NEAR RPC to submit the transaction
 near_rpc_result = send_transaction_to_near_rpc(
-    transaction_rlp_hex=transaction_rlp_hex,
+    b64_txn=b64_near_transaction_with_rlp_hex,
     use_paymaster=True,
     chain_id="97"
 )
