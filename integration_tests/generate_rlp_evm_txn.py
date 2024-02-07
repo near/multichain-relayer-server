@@ -7,13 +7,14 @@ def generate_rlp_encoded_transaction():
     # NOTE: you should update these for your tests
     chain_id = 97  # BSC testnet chain ID
     nonce = 0  # Increment accordingly
-    gas_price = Web3.to_wei(10, 'gwei')  # Adjust based on current conditions
+    gas_price = Web3.to_wei(120, 'gwei')  # Adjust based on current conditions
     gas_limit = 21000  # Standard gas limit for a simple transaction
     to = '0x7b965bDB7F0464843572Eb2B8c17BdF27B720b14'  # Recipient address
-    value = Web3.to_wei(0.01, 'ether')  # Amount to send
+    value = Web3.to_wei(0.01, 'ether')  # Amount to send aka 10^16 Wei
     data = ''  # No data for a simple BNB transfer
 
     # Create a dictionary of the transaction components
+    # Note: can't include from address: TypeError: Transaction must not include unrecognized fields: {'from'}
     tx_dict = {
         'nonce': nonce,
         'gasPrice': gas_price,
