@@ -18,7 +18,7 @@ You also need to paste in the RLP generated hex for the EVM transaction you want
 When it asks you to send or display, choose display as you'll need to paste the b64 encoded output for step 3. 
 Example below:
 ```shell
-near-cli contract call-function as-transaction canhazgas.testnet create_transaction json-args '{"transaction_rlp_hex":"eb80851bf08eb000825208947b965bdb7f0464843572eb2b8c17bdf27b720b14872386f26fc1000080808080","use_paymaster":true}' prepaid-gas '100.000 TeraGas' attached-deposit '0.5 NEAR' sign-as nomnomnom.testnet network-config testnet sign-with-keychain
+near contract call-function as-transaction canhazgas.testnet create_transaction json-args '{"transaction_rlp_hex":"eb80851bf08eb000825208947b965bdb7f0464843572eb2b8c17bdf27b720b14872386f26fc1000080808080","use_paymaster":true}' prepaid-gas '100.000 TeraGas' attached-deposit '0.5 NEAR' sign-as nomnomnom.testnet network-config testnet sign-with-keychain
 ```
 3. Paste the base64 encoded transaction as the value of `b64_near_transaction_with_rlp_hex` var in `integration_test.py`
 
