@@ -17,6 +17,7 @@ use ethers::{
 };
 use reqwest;
 use serde_json::json;
+use std::collections::HashSet;
 use std::fs;
 use std::net::SocketAddr;
 use toml;
@@ -30,6 +31,17 @@ use tracing_flame::FlameLayer;
 // Constants
 lazy_static! {
     static ref CONFIG: Config = load_config();
+    static ref SUPPORTED_CHAINS: HashSet<String> = {
+        CONFIG.chains.iter()
+            .filter_map(|(key, value)| {
+                if value.supported {
+                    Some(key.clone())
+                } else {
+                    None
+                }
+            })
+            .collect()
+    };
 }
 
 fn load_config() -> Config {
@@ -37,7 +49,6 @@ fn load_config() -> Config {
         .expect("Failed to read config.toml");
     toml::from_str(&config_str).expect("Failed to parse config.toml")
 }
-// TODO support multiple chains in code
 // TODO utoipa and OpenApi docs
 
 
@@ -88,6 +99,14 @@ async fn send_funding_and_user_signed_txns(Json(payload): Json<TransactionReques
 
     let funding_txn_raw: EthBytes = EthBytes::from(payload.raw_transactions[0].clone().into_bytes());
     let user_txn_raw: EthBytes = EthBytes::from(payload.raw_transactions[1].clone().into_bytes());
+    // TODO Post MVP return error if chain_id is None
+    let chain_id: String = payload.chain_id.unwrap_or("97".to_string());
+    if !SUPPORTED_CHAINS.contains(&chain_id) {
+        let error_msg = format!("Unsupported chain_id: {chain_id}");
+        error!("{error_msg}");
+        return (StatusCode::BAD_REQUEST, error_msg).into_response();
+    }
+    let rpc_url: String = CONFIG.chains.get(&chain_id).unwrap().rpc_url.clone();
 
     // Send the first transaction (funding)
     let evm_funding_request = EvmRpcRequest {
@@ -99,7 +118,7 @@ async fn send_funding_and_user_signed_txns(Json(payload): Json<TransactionReques
     info!("Sending Funding Transaction: {evm_funding_request:#?}");
 
     let client = reqwest::Client::new();
-    let evm_funding_http_response = match client.post(CONFIG.bsc_testnet_rpc_url.clone())
+    let evm_funding_http_response = match client.post(rpc_url.clone())
         .json(&evm_funding_request)
         .send()
         .await {
@@ -134,7 +153,7 @@ async fn send_funding_and_user_signed_txns(Json(payload): Json<TransactionReques
     info!("Sending User Transaction: {evm_user_txn_request:#?}");
 
     let client = reqwest::Client::new();
-    let response = match client.post(CONFIG.bsc_testnet_rpc_url.clone())
+    let response = match client.post(rpc_url.clone())
         .json(&evm_user_txn_request)
         .send()
         .await {
@@ -164,6 +183,7 @@ async fn send_funding_and_user_signed_txns(Json(payload): Json<TransactionReques
 
 }
 
+// TODO Post MVP remove
 #[instrument]
 async fn get_balance_for_account(Json(payload): Json<BalanceRequestPayload>) -> impl IntoResponse {
     let address = payload.address;
@@ -176,7 +196,7 @@ async fn get_balance_for_account(Json(payload): Json<BalanceRequestPayload>) -> 
     info!("Balance Request: {evm_balance_request:#?}");
 
     let client = reqwest::Client::new();
-    let evm_balance_http_response = match client.post(CONFIG.bsc_testnet_rpc_url.clone())
+    let evm_balance_http_response = match client.post("https://data-seed-prebsc-1-s1.binance.org:8545")
         .json(&evm_balance_request)
         .send()
         .await {

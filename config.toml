@@ -1,5 +1,44 @@
-bsc_testnet_rpc_url = "https://data-seed-prebsc-1-s1.binance.org:8545"
 flametrace_performance = true
+
 [chains]
-"97" = { name = "BSC_TESTNET", rpc_url = "https://data-seed-prebsc-1-s1.binance.org:8545" }
-"56" = { name = "BSC_MAINNET", rpc_url = "https://bsc-dataseed.binance.org" }
+
+# Ethereum L2 Networks - Mainnets
+"42161" = { name = "ARBITRUM_ONE_MAINNET", rpc_url = "https://arb1.arbitrum.io/rpc", supported = false }
+"10" = { name = "OPTIMISM_MAINNET", rpc_url = "https://mainnet.optimism.io", supported = false }
+"zksync-mainnet" = { name = "ZKSYNC_MAINNET", rpc_url = "https://rpc.zksync.io", supported = false }
+"starknet-mainnet" = { name = "STARKNET_MAINNET", rpc_url = "https://starknet.io", supported = false }
+"loopring-mainnet" = { name = "LOOPRING_MAINNET", rpc_url = "https://rpc.loopring.io", supported = false }
+
+# Ethereum L2 Networks - Testnets
+"421611" = { name = "ARBITRUM_RINKEBY", rpc_url = "https://rinkeby.arbitrum.io/rpc", supported = false }
+"69" = { name = "OPTIMISM_KOVAN", rpc_url = "https://kovan.optimism.io", supported = false }
+"zksync-testnet" = { name = "ZKSYNC_TESTNET", rpc_url = "https://rinkeby-api.zksync.io/jsrpc", supported = false }
+"starknet-testnet" = { name = "STARKNET_TESTNET", rpc_url = "https://goerli.starknet.io", supported = false }
+"loopring-testnet" = { name = "LOOPRING_TESTNET", rpc_url = "https://testnet.loopring.io", supported = false }
+
+# Solana Network
+"solana" = { name = "SOLANA_MAINNET", rpc_url = "https://api.mainnet-beta.solana.com", supported = false }
+"solana-testnet" = { name = "SOLANA_TESTNET", rpc_url = "https://api.testnet.solana.com", supported = false }
+
+# Bitcoin Network
+"bitcoin" = { name = "BITCOIN_MAINNET", rpc_url = "https://your-bitcoin-node.example.com", supported = false }
+"bitcoin-testnet" = { name = "BITCOIN_TESTNET", rpc_url = "https://your-bitcoin-testnet-node.example.com", supported = false }
+
+# Ethereum Networks
+"1" = { name = "ETH_MAINNET", rpc_url = "https://mainnet.infura.io/v3/YOUR_PROJECT_ID", supported = false }
+"3" = { name = "ETHEREUM_ROPSTEN", rpc_url = "https://ropsten.infura.io/v3/YOUR_INFURA_PROJECT_ID", supported = false }
+"4" = { name = "ETHEREUM_RINKEBY", rpc_url = "https://rinkeby.infura.io/v3/YOUR_INFURA_PROJECT_ID", supported = false }
+"5" = { name = "ETH_GOERLI", rpc_url = "https://goerli.infura.io/v3/YOUR_PROJECT_ID", supported = false }
+"42" = { name = "ETHEREUM_KOVAN", rpc_url = "https://kovan.infura.io/v3/YOUR_INFURA_PROJECT_ID", supported = false }
+
+# Binance Smart Chain
+"56" = { name = "BSC_MAINNET", rpc_url = "https://bsc-dataseed.binance.org", supported = false }
+"97" = { name = "BSC_TESTNET", rpc_url = "https://data-seed-prebsc-1-s1.binance.org:8545", supported = true }
+
+# Polygon (MATIC) Networks
+"137" = { name = "POLYGON_MAINNET", rpc_url = "https://polygon-rpc.com/", supported = false }
+"80001" = { name = "MUMBAI_TESTNET", rpc_url = "https://rpc-mumbai.maticvigil.com", supported = false }
+
+# Avalanche Networks
+"43114" = { name = "AVAX_MAINNET", rpc_url = "https://api.avax.network/ext/bc/C/rpc", supported = false }
+"43113" = { name = "FUJI_TESTNET", rpc_url = "https://api.avax-test.network/ext/bc/C/rpc", supported = false }

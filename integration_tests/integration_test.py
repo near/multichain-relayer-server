@@ -1,8 +1,5 @@
 import json
 import requests
-import eth_utils
-import rlp
-from eth_utils import to_hex
 from typing import List
 
 
@@ -49,16 +46,16 @@ initial_balance = get_account_balance("0x48cf9dA81d8c9FE834093eCE58ea7221aBc19DB
 print("Initial balance:", initial_balance)
 
 # Step 2: Prepare and encode RLP transaction
-# TODO LP also add the chain_id in the payload
 # paste this in from output of running `near` rust cli to construct the transaction
 # b64_near_transaction_with_rlp_hex = "TODO_rlp_encoded_transaction_here"
 b64_near_transaction_with_rlp_hex = "EQAAAG5vbW5vbW5vbS50ZXN0bmV0AK/HILx7aUbcVWUI9LVl4fD6vaMK5nOJVBHhhhjW0aGqmKlrbzd9AAARAAAAY2FuaGF6Z2FzLnRlc3RuZXTaAUuW61F2txi/BQsX8PbB59NV7LuUHiu0n9mFKitd7wEAAAACEgAAAGNyZWF0ZV90cmFuc2FjdGlvbocAAAB7InRyYW5zYWN0aW9uX3JscF9oZXgiOiJlYjgwODUxYmYwOGViMDAwODI1MjA4OTQ3Yjk2NWJkYjdmMDQ2NDg0MzU3MmViMmI4YzE3YmRmMjdiNzIwYjE0ODcyMzg2ZjI2ZmMxMDAwMDgwODA4MDgwIiwidXNlX3BheW1hc3RlciI6dHJ1ZX0AQHoQ81oAAAAAgNB2ZucN4WkAAAAAAAAAcYC44wS99M6jz6pjBxekk3DT5uSG0AHmpg90j1WZ3k1WVRFUIVolVRzoMk7SAUWLzBpgYEmnFqAI/7zRa1tMBw=="
+chain_id = "97"
 
 # Step 3: Use NEAR RPC to submit the transaction
 near_rpc_result = send_transaction_to_near_rpc(
     b64_txn=b64_near_transaction_with_rlp_hex,
     use_paymaster=True,
-    chain_id="97"
+    chain_id=chain_id
 )
 print("Near RPC Result:", json.dumps(near_rpc_result, indent=4))
 
@@ -71,7 +68,9 @@ updated_balance = get_account_balance("0x48cf9dA81d8c9FE834093eCE58ea7221aBc19DB
 print("Updated balance:", updated_balance)
 
 # Step 6: Compare balances and assert the condition
-# TODO either change the response format of get_balance_for_address or change the parsing of response
+# TODO :
+#  this integration test is outdated and only tests part of the flow
+#  either change the response format of get_balance_for_address or change the parsing of response
 # assert 0.01 < (initial_balance - updated_balance) / 10**18 < 0.015, "The balance difference does not match expected."
 
 print("Transaction processed successfully. Balance difference is within the expected range.")
