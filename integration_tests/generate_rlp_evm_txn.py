@@ -60,6 +60,7 @@ def generate_rlp_encoded_transaction(is_eip_1559: bool = False):
 
         # Now encode with the corrected sedes
         encoded_tx = rlp.encode(tx_list, sedes=tx_sedes)
+        print(encoded_tx)
 
         # Convert to hex
         encoded_tx_hex = '0x' + encoded_tx.hex()
