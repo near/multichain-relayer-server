@@ -1,5 +1,5 @@
 use ethers_core::types::{TransactionRequest, U256};
-use  ethers_core::types::transaction::eip1559::Eip1559TransactionRequest;
+use ethers_core::types::transaction::eip1559::Eip1559TransactionRequest;
 
 // from https://github.com/near/multichain-gas-station-contract/blob/3e544fa5f4fa383f8026d528c7a7c6c7c12432f8/tests/tests.rs#L160-L173
 #[test]
@@ -16,7 +16,7 @@ fn generate_eth_rlp_hex() {
         nonce: Some(0.into()),
     };
 
-    println!("0x{}", hex::encode(bsc_testnet_legacy_transaction.rlp()));
+    println!("{}", hex::encode(bsc_testnet_legacy_transaction.rlp()));
 }
 
 // from https://github.com/near/multichain-gas-station-contract/blob/edc252a07bc1c7e09538c56b9703cfe7dd70a353/contract/tests/tests.rs#L96
@@ -34,7 +34,7 @@ fn generate_eip1559_rlp_hex() {
         value: Some(U256::from(10000000000000000_i64)),  // 0.01 BNB
         nonce: Some(0.into()),
     };
-    println!("0x{}", hex::encode(bsc_testnet_eip1559_transaction.rlp()));
+    println!("{}", hex::encode(bsc_testnet_eip1559_transaction.rlp()));
 }
 
 // NOTE: this generates a different output than the python script generate_rlp_evm_txn.py
