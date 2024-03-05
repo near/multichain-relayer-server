@@ -1,6 +1,8 @@
 # multichain-relayer-server
 Pagoda Implementation of Multichain Relayer Server facilitating cross chain transactions enabling Chain Abstraction.
 
+NOTE: this is not production ready yet. Production ready version will be available by March 31. Feel free to experiment in the meantime. 
+
 ## Technical System Design
 Below is a Design Diagram of the entire multichain relayer system.
 
@@ -23,8 +25,8 @@ Below is a Design Diagram of the entire multichain relayer system.
 ## Supported Chains
 - BSC testnet
 - BSC Mainnet (March 31 2024)
-- Solana Testnet (March 31 2024)
-- Solana Mainnet (March 31 2024)
+- Ethereum Testnet (March 31 2024)
+- Ethereum Mainnet (March 31 2024)
 - More chains coming soon!
 
 ## Multichain Relayer Description
