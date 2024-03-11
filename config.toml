@@ -1,5 +1,7 @@
 flametrace_performance = true
 
+
+# EVM chain reference: https://github.com/alloy-rs/chains/blob/main/assets/chains.json
 [chains]
 
 # Ethereum L2 Networks - Mainnets
@@ -26,6 +28,7 @@ flametrace_performance = true
 
 # Ethereum Networks
 "1" = { name = "ETH_MAINNET", rpc_url = "https://mainnet.infura.io/v3/YOUR_PROJECT_ID", supported = false }
+"11155111" = { name = "SEPOLIA_TESTNET", rpc_url = "https://rpc.sepolia.dev", supported = true }
 "3" = { name = "ETHEREUM_ROPSTEN", rpc_url = "https://ropsten.infura.io/v3/YOUR_INFURA_PROJECT_ID", supported = false }
 "4" = { name = "ETHEREUM_RINKEBY", rpc_url = "https://rinkeby.infura.io/v3/YOUR_INFURA_PROJECT_ID", supported = false }
 "5" = { name = "ETH_GOERLI", rpc_url = "https://goerli.infura.io/v3/YOUR_PROJECT_ID", supported = false }
