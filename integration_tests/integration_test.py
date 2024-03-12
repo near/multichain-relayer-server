@@ -25,15 +25,15 @@ def send_transaction_to_near_rpc(b64_txn: str, use_paymaster: bool, chain_id: st
     }
     response = requests.post(near_rpc_url, json=payload)
     if response.status_code == 200:
-        return response.json()  # Assuming this returns the required list of raw_transactions and chain_id
+        return response.json()  # Assuming this returns the required list of signed_transactions and chain_id
     else:
         raise Exception("Failed to interact with NEAR RPC.")
 
 
-def send_raw_transactions(raw_transactions: List[str], chain_id: str):
+def send_signed_transactions(signed_transactions: List[str], chain_id: str):
     url = "http://localhost:3030/send_funding_and_user_signed_txns"
     payload = {
-        "raw_transactions": raw_transactions,
+        "signed_transactions": signed_transactions,
         "chain_id": chain_id
     }
     response = requests.post(url, json=payload)
@@ -59,8 +59,8 @@ near_rpc_result = send_transaction_to_near_rpc(
 )
 print("Near RPC Result:", json.dumps(near_rpc_result, indent=4))
 
-# Step 4: Send the raw_transactions to localhost
-foreign_chain_tx_result = send_raw_transactions(near_rpc_result["raw_transactions"], near_rpc_result["chain_id"])
+# Step 4: Send the signed_transactions to localhost
+foreign_chain_tx_result = send_signed_transactions(near_rpc_result["signed_transactions"], near_rpc_result["chain_id"])
 print("Foreign Chain Tx Result:", foreign_chain_tx_result)
 
 # Step 5: Get updated balance

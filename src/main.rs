@@ -12,7 +12,6 @@ use axum::{
     routing::{get, post}
 };
 use ethers::{
-    core::types::Bytes as EthBytes,
     core::types::U256,
 };
 use reqwest;
@@ -97,10 +96,9 @@ fn setup_global_subscriber() -> impl Drop {
 async fn send_funding_and_user_signed_txns(Json(payload): Json<TransactionRequest>) -> impl IntoResponse {
     info!("Received /send_funding_and_user_signed_txns request: {payload:#?}");
 
-    let funding_txn_raw: EthBytes = EthBytes::from(payload.raw_transactions[0].clone().into_bytes());
-    let user_txn_raw: EthBytes = EthBytes::from(payload.raw_transactions[1].clone().into_bytes());
-    // TODO Post MVP return error if chain_id is None
-    let chain_id: String = payload.chain_id.unwrap_or("97".to_string());
+    let funding_txn_str: String = payload.signed_transactions[0].clone();
+    let user_txn_str: String = payload.signed_transactions[1].clone();
+    let chain_id: String = payload.foreign_chain_id.clone();
     if !SUPPORTED_CHAINS.contains(&chain_id) {
         let error_msg = format!("Unsupported chain_id: {chain_id}");
         error!("{error_msg}");
@@ -112,7 +110,7 @@ async fn send_funding_and_user_signed_txns(Json(payload): Json<TransactionReques
     let evm_funding_request = EvmRpcRequest {
         jsonrpc: "2.0".to_string(),
         method: "eth_sendRawTransaction".to_string(),
-        params: vec![funding_txn_raw.to_string()],
+        params: vec![funding_txn_str.clone()],
         id: 1,  // if needed change id
     };
     info!("Sending Funding Transaction: {evm_funding_request:#?}");
@@ -147,7 +145,7 @@ async fn send_funding_and_user_signed_txns(Json(payload): Json<TransactionReques
     let evm_user_txn_request = EvmRpcRequest {
         jsonrpc: "2.0".to_string(),
         method: "eth_sendRawTransaction".to_string(),
-        params: vec![user_txn_raw.to_string()],
+        params: vec![user_txn_str.clone()],
         id: 1,  // if needed change id
     };
     info!("Sending User Transaction: {evm_user_txn_request:#?}");

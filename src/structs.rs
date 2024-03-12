@@ -18,8 +18,8 @@ pub struct ChainConfig {
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct TransactionRequest {
-    pub(crate) raw_transactions: [String; 2],
-    pub(crate) chain_id: Option<String>,
+    pub(crate) signed_transactions: [String; 2],
+    pub(crate) foreign_chain_id: String,
 }
 
 #[derive(Clone, Debug, Serialize)]
