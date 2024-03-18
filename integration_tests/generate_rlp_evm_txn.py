@@ -5,9 +5,9 @@ from web3 import Web3
 
 
 def generate_rlp_encoded_transaction(is_eip_1559: bool = False):
-    # BSC Testnet parameters - Note: EIP-1559 might not be applicable to BSC as it is an Ethereum Mainnet feature.
-    # This example assumes Ethereum Mainnet or a testnet that supports EIP-1559.
-    chain_id = 97  # Update accordingly. For Ethereum Mainnet, use 1; for Goerli testnet, use 5
+    # BSC Testnet parameters
+    # This example assumes a network that supports EIP-1559.
+    chain_id = 97  # Update accordingly
     nonce = 0  # Increment accordingly
     to = '0x7b965bDB7F0464843572Eb2B8c17BdF27B720b14'  # Recipient address
     value = Web3.to_wei(0.01, 'ether')  # Amount to send
