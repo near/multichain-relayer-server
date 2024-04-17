@@ -14,12 +14,10 @@ use axum::{
 use ethers::{
     core::types::U256,
 };
-use reqwest;
 use serde_json::json;
 use std::collections::HashSet;
 use std::fs;
 use std::net::SocketAddr;
-use toml;
 use tower_http::trace::TraceLayer;
 use tracing::{error, info, instrument};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};

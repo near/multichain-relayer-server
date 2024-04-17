@@ -10,6 +10,7 @@ pub struct Config {
 
 #[derive(Deserialize)]
 pub struct ChainConfig {
+    #[allow(dead_code)]  // may want to use this in the future
     pub(crate) name: String,
     pub(crate) rpc_url: String,
     pub(crate) supported: bool,
