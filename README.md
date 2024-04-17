@@ -1,6 +1,8 @@
 # multichain-relayer-server
 Pagoda Implementation of Multichain Relayer Server facilitating cross chain transactions enabling Chain Abstraction.
 
+NOTE: this is not production ready yet. Production ready version will be available by March 31. Feel free to experiment in the meantime. 
+
 ## Technical System Design
 Below is a Design Diagram of the entire multichain relayer system.
 
