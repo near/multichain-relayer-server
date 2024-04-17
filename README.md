@@ -25,8 +25,8 @@ Below is a Design Diagram of the entire multichain relayer system.
 ## Supported Chains
 - BSC testnet
 - BSC Mainnet (March 31 2024)
-- Ethereum Testnet (March 31 2024)
-- Ethereum Mainnet (March 31 2024)
+- ETH Sepolia Testnet (March 31 2024)
+- ETH Mainnet (March 31 2024)
 - More chains coming soon!
 
 ## Multichain Relayer Description
@@ -60,6 +60,7 @@ The difference between optimistic or soft confirmations vs real finality is some
 - Better Capital Efficiency with ~real-time settlement using Orderly + professional Market Makers
 ### Decentralization:
 - Replace Multichain Relayer Server with Client Side Libraries
+- Multiple Market Makers running Relayer Servers
 - Txn Trie Inclusion Proofs
 ### Broader Wallet Support:
 - Provide Chain Abstraction Services to wallets that don’t implement MPC

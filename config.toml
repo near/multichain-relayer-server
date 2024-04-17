@@ -1,5 +1,7 @@
 flametrace_performance = true
 
+
+# EVM chain reference: https://github.com/alloy-rs/chains/blob/main/assets/chains.json
 [chains]
 
 # Ethereum L2 Networks - Mainnets
@@ -25,14 +27,15 @@ flametrace_performance = true
 "bitcoin-testnet" = { name = "BITCOIN_TESTNET", rpc_url = "https://your-bitcoin-testnet-node.example.com", supported = false }
 
 # Ethereum Networks
-"1" = { name = "ETH_MAINNET", rpc_url = "https://mainnet.infura.io/v3/YOUR_PROJECT_ID", supported = false }
+"1" = { name = "ETH_MAINNET", rpc_url = "https://mainnet.infura.io/v3/YOUR_PROJECT_ID", supported = true }
+"11155111" = { name = "SEPOLIA_TESTNET", rpc_url = "https://rpc.sepolia.dev", supported = true }
 "3" = { name = "ETHEREUM_ROPSTEN", rpc_url = "https://ropsten.infura.io/v3/YOUR_INFURA_PROJECT_ID", supported = false }
 "4" = { name = "ETHEREUM_RINKEBY", rpc_url = "https://rinkeby.infura.io/v3/YOUR_INFURA_PROJECT_ID", supported = false }
 "5" = { name = "ETH_GOERLI", rpc_url = "https://goerli.infura.io/v3/YOUR_PROJECT_ID", supported = false }
 "42" = { name = "ETHEREUM_KOVAN", rpc_url = "https://kovan.infura.io/v3/YOUR_INFURA_PROJECT_ID", supported = false }
 
 # Binance Smart Chain
-"56" = { name = "BSC_MAINNET", rpc_url = "https://bsc-dataseed.binance.org", supported = false }
+"56" = { name = "BSC_MAINNET", rpc_url = "https://bsc-dataseed.binance.org", supported = true }
 "97" = { name = "BSC_TESTNET", rpc_url = "https://data-seed-prebsc-1-s1.binance.org:8545", supported = true }
 
 # Polygon (MATIC) Networks
