@@ -24,9 +24,9 @@ Below is a Design Diagram of the entire multichain relayer system.
 
 ## Supported Chains
 - BSC testnet
-- BSC Mainnet (March 31 2024)
-- ETH Sepolia Testnet (March 31 2024)
-- ETH Mainnet (March 31 2024)
+- BSC Mainnet 
+- ETH Sepolia Testnet 
+- ETH Mainnet 
 - More chains coming soon!
 
 ## Multichain Relayer Description
