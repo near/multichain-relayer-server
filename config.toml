@@ -2,6 +2,8 @@ flametrace_performance = true
 
 
 # EVM chain reference: https://github.com/alloy-rs/chains/blob/main/assets/chains.json
+# chains: https://chainlist.org/
+# Free RPC: https://www.ankr.com/rpc/
 [chains]
 
 # Ethereum L2 Networks - Mainnets
