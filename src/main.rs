@@ -9,8 +9,7 @@ use axum::{
     routing::{get, post},
     Json, Router,
 };
-use ethers::{core::types::Bytes as EthBytes, core::types::U256};
-use reqwest;
+use ethers::core::types::U256;
 use serde_json::json;
 use std::collections::HashSet;
 use std::fs;
@@ -18,7 +17,6 @@ use std::net::SocketAddr;
 use structs::{
     BalanceRequestPayload, Config, EvmResponse, EvmRpcRequest, RpcError, TransactionRequest,
 };
-use toml;
 use tower_http::trace::TraceLayer;
 use tracing::{error, info, instrument};
 use tracing_flame::FlameLayer;
