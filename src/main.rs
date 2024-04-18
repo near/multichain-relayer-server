@@ -59,6 +59,7 @@ async fn main() {
             .init();
         info!("default tracing setup with flametrace performance DISABLED");
     }
+    info!("Configured support for {} chain(s)", SUPPORTED_CHAINS.len());
 
     let app = Router::new()
         .route(
