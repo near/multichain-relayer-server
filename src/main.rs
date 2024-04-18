@@ -3,14 +3,14 @@ mod util;
 
 #[macro_use]
 extern crate lazy_static;
-
 use axum::{
     http::StatusCode,
     response::IntoResponse,
     routing::{get, post},
     Json, Router,
 };
-use ethers::core::types::U256;
+use ethers::{core::types::Bytes as EthBytes, core::types::U256};
+use reqwest;
 use serde_json::json;
 use std::collections::HashSet;
 use std::fs;
@@ -18,6 +18,7 @@ use std::net::SocketAddr;
 use structs::{
     BalanceRequestPayload, Config, EvmResponse, EvmRpcRequest, RpcError, TransactionRequest,
 };
+use toml;
 use tower_http::trace::TraceLayer;
 use tracing::{error, info, instrument};
 use tracing_flame::FlameLayer;
@@ -59,6 +60,7 @@ async fn main() {
             .init();
         info!("default tracing setup with flametrace performance DISABLED");
     }
+    info!("Configured support for {} chain(s)", SUPPORTED_CHAINS.len());
 
     let app = Router::new()
         .route(
