@@ -28,11 +28,6 @@ pub struct TransactionResponse {
     pub(crate) transaction_hash: Option<String>,
 }
 
-#[derive(Clone, Debug, Deserialize)]
-pub struct BalanceRequestPayload {
-    pub(crate) address: String,
-}
-
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct EvmRpcRequest {
     pub jsonrpc: String,
