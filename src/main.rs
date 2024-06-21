@@ -1,23 +1,14 @@
 mod structs;
-mod util;
 
 #[macro_use]
 extern crate lazy_static;
 
-use axum::{
-    http::StatusCode,
-    response::IntoResponse,
-    routing::{get, post},
-    Json, Router,
-};
-use ethers::core::types::U256;
+use axum::{http::StatusCode, response::IntoResponse, routing::post, Json, Router};
 use serde_json::json;
 use std::collections::HashSet;
 use std::fs;
 use std::net::SocketAddr;
-use structs::{
-    BalanceRequestPayload, Config, EvmResponse, EvmRpcRequest, RpcError, TransactionRequest,
-};
+use structs::{Config, EvmResponse, EvmRpcRequest, RpcError, TransactionRequest};
 use tower_http::trace::TraceLayer;
 use tracing::{error, info, instrument};
 use tracing_flame::FlameLayer;
@@ -66,7 +57,6 @@ async fn main() {
             "/send_funding_and_user_signed_txns",
             post(send_funding_and_user_signed_txns),
         )
-        .route("/get_balance_for_account", get(get_balance_for_account))
         // See https://docs.rs/tower-http/0.1.1/tower_http/trace/index.html for more details.
         .layer(TraceLayer::new_for_http());
 
@@ -194,49 +184,4 @@ async fn send_funding_and_user_signed_txns(
         let result_str = json!(result).to_string();
         (StatusCode::BAD_REQUEST, result_str).into_response()
     };
-}
-
-// TODO Post MVP remove
-#[instrument]
-async fn get_balance_for_account(Json(payload): Json<BalanceRequestPayload>) -> impl IntoResponse {
-    let address = payload.address;
-    let evm_balance_request = EvmRpcRequest {
-        jsonrpc: "2.0".to_string(),
-        method: "eth_getBalance".to_string(),
-        params: vec![address.clone(), "latest".to_string()],
-        id: 1, // if needed change id
-    };
-    info!("Balance Request: {evm_balance_request:#?}");
-
-    let client = reqwest::Client::new();
-    let evm_balance_http_response = match client
-        .post("https://data-seed-prebsc-1-s1.binance.org:8545")
-        .json(&evm_balance_request)
-        .send()
-        .await
-    {
-        Ok(res) => res,
-        Err(_) => {
-            error!("Failed to parse EVM balance response");
-            return (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                "Failed to send EVM balance request",
-            )
-                .into_response();
-        }
-    };
-
-    let evm_balance_response: EvmResponse = match evm_balance_http_response.json().await {
-        Ok(res) => res,
-        Err(_) => {
-            error!("Failed to parse response");
-            return (StatusCode::BAD_REQUEST, "Failed to parse response").into_response();
-        }
-    };
-    // default to 0 balance if not found
-    let hex_str: String = evm_balance_response.result.unwrap_or("0x0".to_string());
-    let balance: U256 = util::convert_hex_to_u256(&hex_str).unwrap();
-    info!("balance: {balance:#?} for account: {address:#?}");
-
-    (StatusCode::OK, balance.to_string()).into_response()
 }
