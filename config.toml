@@ -12,6 +12,8 @@ flametrace_performance = true
 "zksync-mainnet" = { name = "ZKSYNC_MAINNET", rpc_url = "https://rpc.zksync.io", supported = false }
 "starknet-mainnet" = { name = "STARKNET_MAINNET", rpc_url = "https://starknet.io", supported = false }
 "loopring-mainnet" = { name = "LOOPRING_MAINNET", rpc_url = "https://rpc.loopring.io", supported = false }
+"base-testnet" = { name = "BASE_MAINNET", rpc_url = "https://rpc.ankr.com/base", supported = false }  # 8453
+
 
 # Ethereum L2 Networks - Testnets
 "421611" = { name = "ARBITRUM_RINKEBY", rpc_url = "https://rinkeby.arbitrum.io/rpc", supported = false }
@@ -19,6 +21,7 @@ flametrace_performance = true
 "zksync-testnet" = { name = "ZKSYNC_TESTNET", rpc_url = "https://rinkeby-api.zksync.io/jsrpc", supported = false }
 "starknet-testnet" = { name = "STARKNET_TESTNET", rpc_url = "https://goerli.starknet.io", supported = false }
 "loopring-testnet" = { name = "LOOPRING_TESTNET", rpc_url = "https://testnet.loopring.io", supported = false }
+"base-testnet" = { name = "BASE_TESTNET", rpc_url = "https://rpc.ankr.com/base_sepolia", supported = false }  # 84532
 
 # Solana Network
 "solana" = { name = "SOLANA_MAINNET", rpc_url = "https://api.mainnet-beta.solana.com", supported = false }
