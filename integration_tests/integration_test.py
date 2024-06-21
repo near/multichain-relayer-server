@@ -41,9 +41,10 @@ def send_signed_transactions(signed_transactions: List[str], chain_id: str):
         raise Exception("Failed to send raw transactions.")
 
 
-# Step 1: Get initial balance
-initial_balance = get_account_balance("0x48cf9dA81d8c9FE834093eCE58ea7221aBc19DB2")
-print("Initial balance:", initial_balance)
+# Step 1: run near rust cli to construct the transaction
+
+
+# Step 2: The indexer picks up the txn and calls the multichain-relayer-server
 
 # Step 2: Prepare and encode RLP transaction
 # paste this in from output of running `near` rust cli to construct the transaction
@@ -63,14 +64,3 @@ print("Near RPC Result:", json.dumps(near_rpc_result, indent=4))
 foreign_chain_tx_result = send_signed_transactions(near_rpc_result["signed_transactions"], near_rpc_result["chain_id"])
 print("Foreign Chain Tx Result:", foreign_chain_tx_result)
 
-# Step 5: Get updated balance
-updated_balance = get_account_balance("0x48cf9dA81d8c9FE834093eCE58ea7221aBc19DB2")
-print("Updated balance:", updated_balance)
-
-# Step 6: Compare balances and assert the condition
-# TODO :
-#  this integration test is outdated and only tests part of the flow
-#  either change the response format of get_balance_for_address or change the parsing of response
-# assert 0.01 < (initial_balance - updated_balance) / 10**18 < 0.015, "The balance difference does not match expected."
-
-print("Transaction processed successfully. Balance difference is within the expected range.")
