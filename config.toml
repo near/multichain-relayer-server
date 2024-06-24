@@ -8,19 +8,19 @@ flametrace_performance = true
 
 # Ethereum L2 Networks - Mainnets
 "42161" = { name = "ARBITRUM_ONE_MAINNET", rpc_url = "https://rpc.ankr.com/arbitrum", supported = true }
-"10" = { name = "OPTIMISM_MAINNET", rpc_url = "https://mainnet.optimism.io", supported = false }
-"zksync-mainnet" = { name = "ZKSYNC_MAINNET", rpc_url = "https://rpc.zksync.io", supported = false }
-"starknet-mainnet" = { name = "STARKNET_MAINNET", rpc_url = "https://starknet.io", supported = false }
-"loopring-mainnet" = { name = "LOOPRING_MAINNET", rpc_url = "https://rpc.loopring.io", supported = false }
+"10" = { name = "OPTIMISM_MAINNET", rpc_url = "https://rpc.ankr.com/optimism", supported = false }
+"324" = { name = "ZKSYNC_MAINNET", rpc_url = "https://rpc.ankr.com/zksync_era", supported = false }
+"534352" = { name = "SCROLL_MAINNET", rpc_url = "https://rpc.ankr.com/scroll", supported = false }
+"238" = { name = "BLAST_MAINNET", rpc_url = "https://rpc.ankr.com/blast", supported = false }
 "8453" = { name = "BASE_MAINNET", rpc_url = "https://rpc.ankr.com/base", supported = true }
 
 
 # Ethereum L2 Networks - Testnets
-"421614" = { name = "ARBITRUM_SEPOLIA", rpc_url = "https://rpc.ankr.com/arbitrum_sepolia", supported = true }
-"69" = { name = "OPTIMISM_KOVAN", rpc_url = "https://kovan.optimism.io", supported = false }
-"zksync-testnet" = { name = "ZKSYNC_TESTNET", rpc_url = "https://rinkeby-api.zksync.io/jsrpc", supported = false }
-"starknet-testnet" = { name = "STARKNET_TESTNET", rpc_url = "https://goerli.starknet.io", supported = false }
-"loopring-testnet" = { name = "LOOPRING_TESTNET", rpc_url = "https://testnet.loopring.io", supported = false }
+"421614" = { name = "ARBITRUM_SEPOLIA_TESTNET", rpc_url = "https://rpc.ankr.com/arbitrum_sepolia", supported = true }
+"11155420" = { name = "OPTIMISM_SEPOLIA_TESTNET", rpc_url = "https://rpc.ankr.com/optimism_sepolia", supported = false }
+"300" = { name = "ZKSYNC_SEPOLIA_TESTNET", rpc_url = "https://rpc.ankr.com/zksync_era_sepolia", supported = false }
+"534351" = { name = "SCROLL_SEPOLIA_TESTNET", rpc_url = "https://rpc.ankr.com/scroll_sepolia_testnet", supported = false }
+"23888" = { name = "BLAST_SEPOLIA_TESTNET", rpc_url = "https://rpc.ankr.com/blast_testnet_sepolia", supported = false }
 "84532" = { name = "BASE_TESTNET", rpc_url = "https://rpc.ankr.com/base_sepolia", supported = true }
 
 # Solana Network
@@ -33,7 +33,7 @@ flametrace_performance = true
 
 # Ethereum Networks
 "1" = { name = "ETH_MAINNET", rpc_url = "https://rpc.ankr.com/eth", supported = true }
-"11155111" = { name = "SEPOLIA_TESTNET", rpc_url = "https://rpc.sepolia.dev", supported = true }
+"11155111" = { name = "ETH_SEPOLIA_TESTNET", rpc_url = "https://rpc.ankr.com/eth_sepolia", supported = true }
 "5" = { name = "ETH_GOERLI", rpc_url = "https://goerli.gateway.tenderly.co", supported = false }
 
 # Binance Smart Chain
@@ -41,9 +41,11 @@ flametrace_performance = true
 "97" = { name = "BSC_TESTNET", rpc_url = "https://data-seed-prebsc-1-s1.binance.org:8545", supported = true }
 
 # Polygon (MATIC) Networks
-"137" = { name = "POLYGON_MAINNET", rpc_url = "https://polygon-rpc.com/", supported = false }
-"80001" = { name = "MUMBAI_TESTNET", rpc_url = "https://rpc-mumbai.maticvigil.com", supported = false }
+"137" = { name = "POLYGON_MAINNET", rpc_url = "https://rpc.ankr.com/polygon", supported = false }
+"80002" = { name = "POLYGON_AMOY_TESTNET", rpc_url = "https://rpc.ankr.com/polygon_amoy", supported = false }
+"1101" = { name = "POLYGON_ZKEVM_MAINNET", rpc_url = "https://rpc.ankr.com/polygon_zkevm", supported = false }
+"2442" = { name = "POLYGON_ZKEVM_CARDONA_TESTNET", rpc_url = "https://rpc.ankr.com/polygon_zkevm_cardona", supported = false }
 
 # Avalanche Networks
-"43114" = { name = "AVAX_MAINNET", rpc_url = "https://api.avax.network/ext/bc/C/rpc", supported = false }
-"43113" = { name = "FUJI_TESTNET", rpc_url = "https://api.avax-test.network/ext/bc/C/rpc", supported = false }
+"43114" = { name = "AVAX_C_MAINNET", rpc_url = "https://rpc.ankr.com/avalanche-c", supported = false }
+"43113" = { name = "AVAX_FUJI_C_TESTNET", rpc_url = "https://rpc.ankr.com/avalanche_fuji-c", supported = false }
