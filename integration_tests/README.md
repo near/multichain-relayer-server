@@ -1,6 +1,21 @@
-Instructions on how to manually perform end-to-end tests on the entire multichain relayer system including the gas station contract, indexer, and relayer server.  
+## Prerequisites
+You need to have the following installed:
+- Python >=3.10
+- Rust
+- [NEAR CLI-RS](https://github.com/near/near-cli-rs).
+    - Make sure to configure it with the correct network and account.
+
 # Run
-1.  The following instructions are only need to be called once to initialize the account on the gas station. Make sure to replace the `<account_id>` (string) with the account you want to initialize and `<token_id>` (integer) with the token id of the NFT you minted in step ii:
+ TODO
+
+## Manual Steps
+Instructions on how to manually perform end-to-end tests on the entire multichain relayer system including the gas station contract, indexer, and relayer server.
+
+
+
+### Run
+
+1.  The following instructions in 1.i-iii are only need to be called once to initialize the account on the gas station. Make sure to replace the `<account_id>` (string) with the account you want to initialize and `<token_id>` (integer) with the token id of the NFT you minted in step ii:
     1. Registration / Storage Deposit:
     ```shell
     near contract call-function as-transaction v2.nft.kagi.testnet \
