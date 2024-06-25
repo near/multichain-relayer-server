@@ -11,10 +11,6 @@ You need to have the following installed:
 ## Manual Steps
 Instructions on how to manually perform end-to-end tests on the entire multichain relayer system including the gas station contract, indexer, and relayer server.
 
-
-
-### Run
-
 1.  The following instructions in 1.i-iii are only need to be called once to initialize the account on the gas station. Make sure to replace the `<account_id>` (string) with the account you want to initialize and `<token_id>` (integer) with the token id of the NFT you minted in step ii:
     1. Registration / Storage Deposit:
     ```shell
@@ -105,6 +101,8 @@ Instructions on how to manually perform end-to-end tests on the entire multichai
       network-config testnet \
       sign-with-keychain send
     ```
+   
+NOTE: this step will be updated soon, as support for yield/resume calls is implemented on MPC contract. 
 8. Watch the output of the gas station event indexer to see the transactions being emitted by the gas station contract.
 9. Watch the output of the multichain relayer server to see the transactions being sent to the foreign chain.
 
