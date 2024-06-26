@@ -49,6 +49,8 @@ def initialize_account(account_id, verbose=False):
     output, error = run_command(cmd, verbose)
     print("Approve Gas Station completed.")
 
+    return token_id
+
 
 def get_paymaster_info(account_id, chain_id, verbose=False):
     print(f"Getting paymaster info for chain {chain_id}...")
@@ -70,10 +72,10 @@ def set_nonce(account_id, chain_id, nonce, verbose=False):
     print("Nonce set successfully.")
 
 
-def create_transaction(account_id, rlp_hex, verbose=False):
+def create_transaction(account_id, rlp_hex, token_id, verbose=False):
     print("Creating transaction...")
     cmd = f"""near contract call-function as-transaction canhazgas.testnet \
-      create_transaction json-args '{{"transaction_rlp_hex":"{rlp_hex}","use_paymaster":true}}' \
+      create_transaction json-args '{{"transaction_rlp_hex":"{rlp_hex}","use_paymaster":true,"token_id":"{token_id}"}}' \
       prepaid-gas '100.000 TeraGas' attached-deposit '0.5 NEAR' \
       sign-as {account_id}.testnet network-config testnet sign-with-keychain send"""
     output, error = run_command(cmd, verbose)
@@ -98,9 +100,13 @@ def main():
     account_id = input("Enter your account ID (without .testnet): ")
     chain_id = input("Enter the chain ID: ")
     rlp_hex = input("Enter the RLP hex for the EVM transaction: ")
+    token_id = input("Enter the token ID (leave blank if you don't have one): ")
 
-    # Initialize account
-    initialize_account(account_id, args.verbose)
+    if token_id == "":
+        # Initialize account
+        token_id = initialize_account(account_id, args.verbose)
+    else:
+        print(f"Using provided token_id: {token_id}")
 
     # Get paymaster info
     paymaster_info = get_paymaster_info(account_id, chain_id, args.verbose)
@@ -113,7 +119,7 @@ def main():
         set_nonce(account_id, chain_id, new_nonce, args.verbose)
 
     # Create transaction
-    transaction = create_transaction(account_id, rlp_hex, args.verbose)
+    transaction = create_transaction(account_id, rlp_hex, token_id, args.verbose)
     transaction_id = transaction['id']
 
     # Sign transaction twice
