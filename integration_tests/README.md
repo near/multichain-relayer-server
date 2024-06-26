@@ -6,7 +6,11 @@ You need to have the following installed:
     - Make sure to configure it with the correct network and account.
 
 # Run
- TODO
+From root of multichain-relayer-server repo directory run: 
+```
+python3 integration_tests/integration_test.py
+```
+with the optional `--verbose` flag to print subprocess output.
 
 ## Manual Steps
 Instructions on how to manually perform end-to-end tests on the entire multichain relayer system including the gas station contract, indexer, and relayer server.
