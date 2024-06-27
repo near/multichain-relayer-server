@@ -6,15 +6,16 @@ You need to have the following installed:
     - Make sure to configure it with the correct network and account.
 
 # Run
+
+In separate terminals, run the following:
+- [gas station indexer](https://github.com/near/gas-station-event-indexer/tree/main) locally with the correct values in the `config.toml` file: `make run`
+- multichain server (this repo) is configured correctly (`config.toml`) and run: `cargo run`
+
 From root of multichain-relayer-server repo directory run: 
 ```
 python3 integration_tests/integration_test.py
 ```
 with the optional `--verbose` flag to print subprocess output.
-
-In separate terminals, run the following:
-- [gas station indexer](https://github.com/near/gas-station-event-indexer/tree/main) locally with the correct values in the `config.toml` file: `make run`
-- multichain server (this repo) is configured correctly (`config.toml`) and run: `cargo run`
 
 ## Manual Steps
 Instructions on how to manually perform end-to-end tests on the entire multichain relayer system including the gas station contract, indexer, and relayer server.
