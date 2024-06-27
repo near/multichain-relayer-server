@@ -1,6 +1,8 @@
 import argparse
 import copy
 import json
+import re
+import requests
 import subprocess
 import time
 
@@ -90,6 +92,27 @@ def sign_next(account_id, transaction_id, verbose=False):
       sign-as {account_id}.testnet network-config testnet sign-with-keychain send"""
     output, error = run_command(cmd, verbose)
     print("Transaction signed.")
+    return output
+
+
+def extract_event_data(output):
+    event_json_match = re.search(r'EVENT_JSON:(.*)', output)
+    if event_json_match:
+        event_json_str = event_json_match.group(1)
+        event_json = json.loads(event_json_str)
+        return event_json.get('data', {})
+    return None
+
+
+def send_to_endpoint(data):
+    url = "http://localhost:3030/send_funding_and_user_signed_txns"
+    payload = {
+        "foreign_chain_id": data["foreign_chain_id"],
+        "signed_transactions": data["signed_transactions"]
+    }
+    response = requests.post(url, json=payload)
+    print(f"Endpoint response status code: {response.status_code}")
+    print(f"Endpoint response content: {response.text}")
 
 
 def main():
@@ -101,6 +124,7 @@ def main():
     chain_id = input("Enter the chain ID: ")
     rlp_hex = input("Enter the RLP hex for the EVM transaction (exclude 0x prefix): ")
     token_id = input("Enter the token ID (leave blank if you don't have one): ")
+    skip_indexer: bool = input("Do you want to skip the indexer and send data directly to the endpoint? (y/n): ").lower().strip() == 'y'
 
     if token_id == "":
         # Initialize account
@@ -123,8 +147,14 @@ def main():
     transaction_id = transaction['id']
 
     # Sign transaction twice
-    for _ in range(2):
-        sign_next(account_id, transaction_id, args.verbose)
+    for i in range(2):
+        output = sign_next(account_id, transaction_id, args.verbose)
+        if i == 1 and skip_indexer:  # After the second sign_next call
+            event_data = extract_event_data(output)
+            if event_data:
+                send_to_endpoint(event_data)
+            else:
+                print("Failed to extract event data from output.")
         time.sleep(5)  # Wait a bit between signings
 
     print("Integration test completed. Check the gas station event indexer and multichain relayer server outputs.")
