@@ -99,7 +99,7 @@ def main():
 
     account_id = input("Enter your account ID (without .testnet): ")
     chain_id = input("Enter the chain ID: ")
-    rlp_hex = input("Enter the RLP hex for the EVM transaction: ")
+    rlp_hex = input("Enter the RLP hex for the EVM transaction (exclude 0x prefix): ")
     token_id = input("Enter the token ID (leave blank if you don't have one): ")
 
     if token_id == "":

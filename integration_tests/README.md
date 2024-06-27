@@ -69,8 +69,8 @@ Instructions on how to manually perform end-to-end tests on the entire multichai
     network-config testnet \
     sign-with-keychain send
     ```
-3. Update the transaction details of the EVM transaction you want to send in `generate_rlp_evm_txn.py` then run the script and save the RLP hex string output. 
-   1. If that doesn't work, try running the `generate_eip1559_rlp_hex()` test in tests/tests.rs - python and rust output different hex rlp excoded txns :/  
+3. Update the transaction details of the EVM transaction you want to send in `generate_eip1559_rlp_hex()` test in tests/tests.rs  then run the script and save the RLP hex string output. 
+   1. If that doesn't work, try running `generate_rlp_evm_txn.py` 
    
 4. Ensure the [gas station indexer](https://github.com/near/gas-station-event-indexer/tree/main) is running locally with the correct values in the `config.toml` file
 5. Ensure the multichain server is configured correctly (`config.toml`) and running: `cargo run`
