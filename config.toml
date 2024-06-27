@@ -8,7 +8,7 @@ flametrace_performance = true
 
 # Ethereum L2 Networks - Mainnets
 "42161" = { name = "ARBITRUM_ONE_MAINNET", rpc_url = "https://rpc.ankr.com/arbitrum", supported = true }
-"10" = { name = "OPTIMISM_MAINNET", rpc_url = "https://rpc.ankr.com/optimism", supported = false }
+"10" = { name = "OPTIMISM_MAINNET", rpc_url = "https://rpc.ankr.com/optimism", supported = true }
 "324" = { name = "ZKSYNC_MAINNET", rpc_url = "https://rpc.ankr.com/zksync_era", supported = false }
 "534352" = { name = "SCROLL_MAINNET", rpc_url = "https://rpc.ankr.com/scroll", supported = false }
 "238" = { name = "BLAST_MAINNET", rpc_url = "https://rpc.ankr.com/blast", supported = false }
@@ -17,7 +17,7 @@ flametrace_performance = true
 
 # Ethereum L2 Networks - Testnets
 "421614" = { name = "ARBITRUM_SEPOLIA_TESTNET", rpc_url = "https://rpc.ankr.com/arbitrum_sepolia", supported = true }
-"11155420" = { name = "OPTIMISM_SEPOLIA_TESTNET", rpc_url = "https://rpc.ankr.com/optimism_sepolia", supported = false }
+"11155420" = { name = "OPTIMISM_SEPOLIA_TESTNET", rpc_url = "https://rpc.ankr.com/optimism_sepolia", supported = true }
 "300" = { name = "ZKSYNC_SEPOLIA_TESTNET", rpc_url = "https://rpc.ankr.com/zksync_era_sepolia", supported = false }
 "534351" = { name = "SCROLL_SEPOLIA_TESTNET", rpc_url = "https://rpc.ankr.com/scroll_sepolia_testnet", supported = false }
 "23888" = { name = "BLAST_SEPOLIA_TESTNET", rpc_url = "https://rpc.ankr.com/blast_testnet_sepolia", supported = false }
