@@ -87,7 +87,7 @@ Instructions on how to manually perform end-to-end tests on the entire multichai
     ```shell
     near contract call-function as-transaction canhazgas.testnet \
       create_transaction json-args '{"transaction_rlp_hex":"eb80851bf08eb000825208947b965bdb7f0464843572eb2b8c17bdf27b720b14872386f26fc1000080808080","use_paymaster":true,"token_id":"<token_id>"}' \
-      prepaid-gas '100.000 TeraGas' attached-deposit '0.5 NEAR' \
+      prepaid-gas '100.000 TeraGas' attached-deposit '<deposit_in_near> NEAR' \
       sign-as <account_id>.testnet \
       network-config testnet sign-with-keychain send
     ```

@@ -74,11 +74,11 @@ def set_nonce(account_id, chain_id, nonce, verbose=False):
     print("Nonce set successfully.")
 
 
-def create_transaction(account_id, rlp_hex, token_id, verbose=False):
+def create_transaction(account_id, rlp_hex, token_id, near_deposit, verbose=False):
     print("Creating transaction...")
     cmd = f"""near contract call-function as-transaction canhazgas.testnet \
       create_transaction json-args '{{"transaction_rlp_hex":"{rlp_hex}","use_paymaster":true,"token_id":"{token_id}"}}' \
-      prepaid-gas '100.000 TeraGas' attached-deposit '0.5 NEAR' \
+      prepaid-gas '100.000 TeraGas' attached-deposit '{near_deposit} NEAR' \
       sign-as {account_id}.testnet network-config testnet sign-with-keychain send"""
     output, error = run_command(cmd, verbose)
     return json.loads(output)
@@ -125,6 +125,9 @@ def main():
     rlp_hex = input("Enter the RLP hex for the EVM transaction (exclude 0x prefix): ")
     token_id = input("Enter the token ID (leave blank if you don't have one): ")
     skip_indexer: bool = input("Do you want to skip the indexer and send data directly to the endpoint? (y/n): ").lower().strip() == 'y'
+    near_deposit: float = float(
+        input("Enter the amount of NEAR to attach to the gas station transaction as payment for foreign chain gas: ")
+    )
 
     if token_id == "":
         # Initialize account
@@ -143,7 +146,7 @@ def main():
         set_nonce(account_id, chain_id, new_nonce, args.verbose)
 
     # Create transaction
-    transaction = create_transaction(account_id, rlp_hex, token_id, args.verbose)
+    transaction = create_transaction(account_id, rlp_hex, token_id, near_deposit, args.verbose)
     transaction_id = transaction['id']
 
     # Sign transaction twice
