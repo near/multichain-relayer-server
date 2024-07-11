@@ -5,6 +5,7 @@ import re
 import requests
 import subprocess
 import time
+from web3 import Web3
 
 
 def run_command(command, verbose=False):
@@ -125,6 +126,10 @@ def main():
     rlp_hex = input("Enter the RLP hex for the EVM transaction (exclude 0x prefix): ")
     token_id = input("Enter the token ID (leave blank if you don't have one): ")
     skip_indexer: bool = input("Do you want to skip the indexer and send data directly to the endpoint? (y/n): ").lower().strip() == 'y'
+    # You can use `estimate_fee` on the gas station contract to calculate an exact fee, given some oracle prices.
+    # Inconveniently, since you can't do xcc in a view call,
+    # this requires pulling the price data yourself to use as input to the function.
+    # https://github.com/near/multichain-gas-station-contract/blob/c83bdb069bda7ebdbf44b87fd9a35205d55e6743/gas_station/src/impl_management.rs#L402
     near_deposit: float = float(
         input("Enter the amount of NEAR to attach to the gas station transaction as payment for foreign chain gas: ")
     )
@@ -142,7 +147,16 @@ def main():
     current_nonce = paymaster_info[0]['nonce']
     set_nonce_input = input(f"Current nonce is {current_nonce}. Do you want to set a new nonce? (y/n): ")
     if set_nonce_input.lower() == 'y':
-        new_nonce = int(input("Enter the new nonce: "))
+        is_manual_nonce = input(f"Do you want to set a new nonce manually? (y/n): ").lower().strip() == 'y'
+        if is_manual_nonce:
+            new_nonce = int(input("Enter the new nonce: "))
+        else:
+            eth_rpc_url = input("Enter the EVM RPC URL (examples can be found in config.toml): ")
+            from_account_address = token_id = input("Enter the account address for the foreign chain: ")
+
+            web3_rpc = Web3(Web3.HTTPProvider(eth_rpc_url))
+            new_nonce = web3_rpc.eth.get_transaction_count(web3_rpc.to_checksum_address(from_account_address))
+
         set_nonce(account_id, chain_id, new_nonce, args.verbose)
 
     # Create transaction
