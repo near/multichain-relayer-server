@@ -1,76 +1,181 @@
+import argparse
+import copy
 import json
+import re
 import requests
-from typing import List
+import subprocess
+import time
+from web3 import Web3
 
 
-def get_account_balance(address: str):
-    url = "http://localhost:3030/get_balance_for_account"
-    payload = {"address": address}
-    response = requests.get(url, json=payload)
-    if response.status_code == 200:
-        return response.json()
-    else:
-        raise Exception("Failed to fetch account balance.")
+def run_command(command, verbose=False):
+    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    output, error = process.communicate()
+    output_str = output.decode('utf-8')
+    error_str = error.decode('utf-8')
+    if verbose:
+        print("Command output:")
+        print(output_str)
+        if error_str:
+            print("Command error:")
+            print(error_str)
+    return output_str, error_str
 
 
-def send_transaction_to_near_rpc(b64_txn: str, use_paymaster: bool, chain_id: str):
-    near_rpc_url = "https://rpc.testnet.near.org"
-    payload = {
-        "jsonrpc": "2.0",
-        "id": "1",
-        "method": "broadcast_tx_commit",
-        "params": [
-            b64_txn
-        ]
-    }
-    response = requests.post(near_rpc_url, json=payload)
-    if response.status_code == 200:
-        return response.json()  # Assuming this returns the required list of signed_transactions and chain_id
-    else:
-        raise Exception("Failed to interact with NEAR RPC.")
+def initialize_account(account_id, verbose=False):
+    print(f"Initializing account {account_id}...")
+
+    # Storage deposit
+    cmd = f"""near contract call-function as-transaction v2.nft.kagi.testnet \
+      storage_deposit json-args {{}} prepaid-gas '100.0 Tgas' attached-deposit '1 NEAR' \
+      sign-as {account_id}.testnet network-config testnet sign-with-keychain send"""
+    output, error = run_command(cmd, verbose)
+    print("Storage deposit completed.")
+
+    # Mint NFT
+    cmd = f"""near contract call-function as-transaction v2.nft.kagi.testnet \
+      mint json-args {{}} prepaid-gas '100.0 Tgas' attached-deposit '0 NEAR' \
+      sign-as {account_id}.testnet network-config testnet sign-with-keychain send"""
+    output, error = run_command(cmd, verbose)
+    print("Mint NFT completed.")
+
+    # Extract token_id from output
+    token_id: str = copy.deepcopy(output)
+    token_id = token_id.strip()
+    print(f"Extracted token_id: {token_id}")
+
+    # Approve Gas Station for this Token
+    cmd = f"""near contract call-function as-transaction v2.nft.kagi.testnet \
+      ckt_approve_call json-args '{{"token_id":"{token_id}","account_id":"canhazgas.testnet","msg":""}}' \
+      prepaid-gas '100.0 Tgas' attached-deposit '1 yoctoNEAR' \
+      sign-as {account_id}.testnet network-config testnet sign-with-keychain send"""
+    output, error = run_command(cmd, verbose)
+    print("Approve Gas Station completed.")
+
+    return token_id
 
 
-def send_signed_transactions(signed_transactions: List[str], chain_id: str):
+def get_paymaster_info(account_id, chain_id, verbose=False):
+    print(f"Getting paymaster info for chain {chain_id}...")
+    cmd = f"""near contract call-function as-transaction canhazgas.testnet \
+     get_paymasters json-args '{{"chain_id": "{chain_id}"}}' \
+     prepaid-gas '100.0 Tgas' attached-deposit '0 NEAR' \
+     sign-as {account_id}.testnet network-config testnet sign-with-keychain send"""
+    output, error = run_command(cmd, verbose)
+    return json.loads(output)
+
+
+def set_nonce(account_id, chain_id, nonce, verbose=False):
+    print(f"Setting nonce for chain {chain_id} to {nonce}...")
+    cmd = f"""near contract call-function as-transaction canhazgas.testnet \
+     set_nonce json-args '{{"chain_id": "{chain_id}", "nonce": {nonce}}}' \
+     prepaid-gas '100.000 Tgas' attached-deposit '0 NEAR' \
+     sign-as {account_id}.testnet network-config testnet sign-with-keychain send"""
+    output, error = run_command(cmd, verbose)
+    print("Nonce set successfully.")
+
+
+def create_transaction(account_id, rlp_hex, token_id, near_deposit, verbose=False):
+    print("Creating transaction...")
+    cmd = f"""near contract call-function as-transaction canhazgas.testnet \
+      create_transaction json-args '{{"transaction_rlp_hex":"{rlp_hex}","use_paymaster":true,"token_id":"{token_id}"}}' \
+      prepaid-gas '100.000 TeraGas' attached-deposit '{near_deposit} NEAR' \
+      sign-as {account_id}.testnet network-config testnet sign-with-keychain send"""
+    output, error = run_command(cmd, verbose)
+    return json.loads(output)
+
+
+def sign_next(account_id, transaction_id, verbose=False):
+    print(f"Signing transaction {transaction_id}...")
+    cmd = f"""near contract call-function as-transaction canhazgas.testnet \
+      sign_next json-args '{{"id":"{transaction_id}"}}' \
+      prepaid-gas '300.0 Tgas' attached-deposit '0 NEAR' \
+      sign-as {account_id}.testnet network-config testnet sign-with-keychain send"""
+    output, error = run_command(cmd, verbose)
+    print("Transaction signed.")
+    return output
+
+
+def extract_event_data(output):
+    event_json_match = re.search(r'EVENT_JSON:(.*)', output)
+    if event_json_match:
+        event_json_str = event_json_match.group(1)
+        event_json = json.loads(event_json_str)
+        return event_json.get('data', {})
+    return None
+
+
+def send_to_endpoint(data):
     url = "http://localhost:3030/send_funding_and_user_signed_txns"
     payload = {
-        "signed_transactions": signed_transactions,
-        "chain_id": chain_id
+        "foreign_chain_id": data["foreign_chain_id"],
+        "signed_transactions": data["signed_transactions"]
     }
     response = requests.post(url, json=payload)
-    if response.status_code != 200:
-        raise Exception("Failed to send raw transactions.")
+    print(f"Endpoint response status code: {response.status_code}")
+    print(f"Endpoint response content: {response.text}")
 
 
-# Step 1: Get initial balance
-initial_balance = get_account_balance("0x48cf9dA81d8c9FE834093eCE58ea7221aBc19DB2")
-print("Initial balance:", initial_balance)
+def main():
+    parser = argparse.ArgumentParser(description="Run integration tests for the multichain relayer system.")
+    parser.add_argument("--verbose", action="store_true", help="Print subprocess output")
+    args = parser.parse_args()
 
-# Step 2: Prepare and encode RLP transaction
-# paste this in from output of running `near` rust cli to construct the transaction
-# b64_near_transaction_with_rlp_hex = "TODO_rlp_encoded_transaction_here"
-b64_near_transaction_with_rlp_hex = "EQAAAG5vbW5vbW5vbS50ZXN0bmV0AK/HILx7aUbcVWUI9LVl4fD6vaMK5nOJVBHhhhjW0aGqmKlrbzd9AAARAAAAY2FuaGF6Z2FzLnRlc3RuZXTaAUuW61F2txi/BQsX8PbB59NV7LuUHiu0n9mFKitd7wEAAAACEgAAAGNyZWF0ZV90cmFuc2FjdGlvbocAAAB7InRyYW5zYWN0aW9uX3JscF9oZXgiOiJlYjgwODUxYmYwOGViMDAwODI1MjA4OTQ3Yjk2NWJkYjdmMDQ2NDg0MzU3MmViMmI4YzE3YmRmMjdiNzIwYjE0ODcyMzg2ZjI2ZmMxMDAwMDgwODA4MDgwIiwidXNlX3BheW1hc3RlciI6dHJ1ZX0AQHoQ81oAAAAAgNB2ZucN4WkAAAAAAAAAcYC44wS99M6jz6pjBxekk3DT5uSG0AHmpg90j1WZ3k1WVRFUIVolVRzoMk7SAUWLzBpgYEmnFqAI/7zRa1tMBw=="
-chain_id = "97"
+    account_id = input("Enter your account ID (without .testnet): ")
+    chain_id = input("Enter the chain ID: ")
+    rlp_hex = input("Enter the RLP hex for the EVM transaction (exclude 0x prefix): ")
+    token_id = input("Enter the token ID (leave blank if you don't have one): ")
+    skip_indexer: bool = input("Do you want to skip the indexer and send data directly to the endpoint? (y/n): ").lower().strip() == 'y'
+    # You can use `estimate_fee` on the gas station contract to calculate an exact fee, given some oracle prices.
+    # Inconveniently, since you can't do xcc in a view call,
+    # this requires pulling the price data yourself to use as input to the function.
+    # https://github.com/near/multichain-gas-station-contract/blob/c83bdb069bda7ebdbf44b87fd9a35205d55e6743/gas_station/src/impl_management.rs#L402
+    near_deposit: float = float(
+        input("Enter the amount of NEAR to attach to the gas station transaction as payment for foreign chain gas: ")
+    )
 
-# Step 3: Use NEAR RPC to submit the transaction
-near_rpc_result = send_transaction_to_near_rpc(
-    b64_txn=b64_near_transaction_with_rlp_hex,
-    use_paymaster=True,
-    chain_id=chain_id
-)
-print("Near RPC Result:", json.dumps(near_rpc_result, indent=4))
+    if token_id == "":
+        # Initialize account
+        token_id = initialize_account(account_id, args.verbose)
+    else:
+        print(f"Using provided token_id: {token_id}")
 
-# Step 4: Send the signed_transactions to localhost
-foreign_chain_tx_result = send_signed_transactions(near_rpc_result["signed_transactions"], near_rpc_result["chain_id"])
-print("Foreign Chain Tx Result:", foreign_chain_tx_result)
+    # Get paymaster info
+    paymaster_info = get_paymaster_info(account_id, chain_id, args.verbose)
 
-# Step 5: Get updated balance
-updated_balance = get_account_balance("0x48cf9dA81d8c9FE834093eCE58ea7221aBc19DB2")
-print("Updated balance:", updated_balance)
+    # Set nonce if needed
+    current_nonce = paymaster_info[0]['nonce']
+    set_nonce_input = input(f"Current nonce is {current_nonce}. Do you want to set a new nonce? (y/n): ")
+    if set_nonce_input.lower() == 'y':
+        is_manual_nonce = input(f"Do you want to set a new nonce manually? (y/n): ").lower().strip() == 'y'
+        if is_manual_nonce:
+            new_nonce = int(input("Enter the new nonce: "))
+        else:
+            eth_rpc_url = input("Enter the EVM RPC URL (examples can be found in config.toml): ")
+            from_account_address = token_id = input("Enter the account address for the foreign chain: ")
 
-# Step 6: Compare balances and assert the condition
-# TODO :
-#  this integration test is outdated and only tests part of the flow
-#  either change the response format of get_balance_for_address or change the parsing of response
-# assert 0.01 < (initial_balance - updated_balance) / 10**18 < 0.015, "The balance difference does not match expected."
+            web3_rpc = Web3(Web3.HTTPProvider(eth_rpc_url))
+            new_nonce = web3_rpc.eth.get_transaction_count(web3_rpc.to_checksum_address(from_account_address))
 
-print("Transaction processed successfully. Balance difference is within the expected range.")
+        set_nonce(account_id, chain_id, new_nonce, args.verbose)
+
+    # Create transaction
+    transaction = create_transaction(account_id, rlp_hex, token_id, near_deposit, args.verbose)
+    transaction_id = transaction['id']
+
+    # Sign transaction twice
+    for i in range(2):
+        output = sign_next(account_id, transaction_id, args.verbose)
+        if i == 1 and skip_indexer:  # After the second sign_next call
+            event_data = extract_event_data(output)
+            if event_data:
+                send_to_endpoint(event_data)
+            else:
+                print("Failed to extract event data from output.")
+        time.sleep(5)  # Wait a bit between signings
+
+    print("Integration test completed. Check the gas station event indexer and multichain relayer server outputs.")
+
+
+if __name__ == "__main__":
+    main()
