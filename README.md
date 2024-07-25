@@ -1,7 +1,11 @@
 # multichain-relayer-server
 Pagoda Implementation of Multichain Relayer Server facilitating cross chain transactions enabling Chain Abstraction.
 
-NOTE: this is not production ready yet. Production ready version will be available by March 31. Feel free to experiment in the meantime. 
+## Run Multichain Relayer Server
+`cargo run`
+
+## Run and Test all Multichain Gas Relayer Systems
+See [Integration Tests](https://github.com/near/multichain-relayer-server/blob/main/integration_tests/README.md)
 
 ## Technical System Design
 Below is a Design Diagram of the entire multichain relayer system.
@@ -23,10 +27,11 @@ Below is a Design Diagram of the entire multichain relayer system.
 6. The Cross Chain Settlement takes care of selling the extra NEAR being sent to the gas station contract for gas tokens on foreign chains as well as bridging the tokens to the other chains. This process is currently manual, but will be automated in partnership with market makers in the future.
 
 ## Supported Chains
-- BSC testnet
-- BSC Mainnet 
-- ETH Sepolia Testnet 
-- ETH Mainnet 
+- BSC Testnet & Mainnet 
+- ETH Sepolia Testnet & Mainnet
+- Arbitrum Sepolia Testnet & Mainnet
+- Optimism Sepolia Testnet & Mainnet
+- Base Sepolia Testnet & Mainnet
 - More chains coming soon!
 
 ## Multichain Relayer Description
@@ -39,7 +44,6 @@ Below is a Design Diagram of the entire multichain relayer system.
 1. `/send_funding_and_user_signed_txns` which handles both
    1. Funding the user's xchain account with gas from the paymaster treasury account, which is provided as a raw signed transaction
    2. Sending the user's raw signed transaction (in hexadecimal in EVM case) after the funding transaction has been confirmed on the foreign chain
-2. (MVP only) `/get_balance_for_account` endpoint that gets the native gas token (BNB) balance for an account. AKA Poor man's indexing
 
 ## Total Time Expectations for the End User
 It depends on the chain, but in our current estimation 50-90% of the time will be on NEAR calling and waiting for the signing to complete on the MPC service. 
@@ -57,7 +61,7 @@ The difference between optimistic or soft confirmations vs real finality is some
 ## Future Directions
 ### Scale:
 - Moar Chainzzz
-- Better Capital Efficiency with ~real-time settlement using Orderly + professional Market Makers
+- Better Capital Efficiency with ~real-time settlement using professional Market Makers
 ### Decentralization:
 - Replace Multichain Relayer Server with Client Side Libraries
 - Multiple Market Makers running Relayer Servers
